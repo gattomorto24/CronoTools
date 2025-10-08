@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Specchia Immagini - CronoTools</title>
+    <style>
+        /* Stile CSS v15.0 - Stabile e completo */
+        :root, :root[data-theme="light"] { 
+            --bg-primary: #f2f2f7; --bg-secondary: #ffffff; --bg-tertiary: #e5e5ea; 
+            --bg-glass: rgba(255, 255, 255, 0.7); --text-primary: #000000; 
+            --text-secondary: rgba(60, 60, 67, 0.6); --accent: #007aff; 
+            --separator: rgba(60, 60, 67, 0.15); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12); 
+            --radius-lg: 20px; 
+        }
+        [data-theme="dark"] { 
+            --bg-primary: #000000; --bg-secondary: #1c1c1e; --bg-tertiary: #2c2c2e; 
+            --bg-glass: rgba(28, 28, 30, 0.8); --text-primary: #ffffff; 
+            --text-secondary: rgba(235, 235, 245, 0.6); --accent: #0a84ff; 
+            --separator: rgba(84, 84, 88, 0.4); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4); 
+        }
+        [data-theme="midnight"] { 
+            --bg-primary: #000000; --bg-secondary: #121212; --bg-tertiary: #2a2a2c; 
+            --bg-glass: rgba(18, 18, 18, 0.85); --text-primary: #ffffff; 
+            --text-secondary: rgba(255, 255, 255, 0.55); --accent: #0a84ff; 
+            --separator: #272729; --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        [data-theme="slate"] { 
+            --bg-primary: #0a192f; --bg-secondary: #112240; --bg-tertiary: #233554; 
+            --bg-glass: rgba(10, 25, 47, 0.85); --text-primary: #ccd6f6;
+            --text-secondary: #8892b0; --accent: #f97316; 
+            --separator: #112240; --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        [data-theme="latte"] { 
+            --bg-primary: #EFF1F5; --bg-secondary: #FFFFFF; --bg-tertiary: #E6E9EF; 
+            --bg-glass: rgba(239, 241, 245, 0.8); --text-primary: #4C4F69; 
+            --text-secondary: #6C6F84; --accent: #8b5cf6; 
+            --separator: #DCE0E8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg-primary); color: var(--text-primary); 
+            transition: background 0.3s, color 0.3s; 
+            -webkit-font-smoothing: antialiased;
+        }
+        body.no-scroll { overflow: hidden; }
+
+        /* --- Stili di Navigazione (Invariati) --- */
+        #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; background: transparent; border-bottom: 1px solid transparent; height: 60px; padding: 0 24px; transition: height 0.3s, background-color 0.3s, border-color 0.3s; }
+        #navbar.scrolled { height: 40px; background-color: var(--bg-glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom-color: var(--separator); }
+        .nav-btn { background: none; border: none; color: var(--accent); cursor: pointer; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background-color 0.2s; }
+        .nav-placeholder { width: 44px; flex-shrink: 0; }
+        .nav-center-links { display: flex; gap: 8px; transition: opacity 0.3s, transform 0.3s; }
+        #navbar.scrolled .nav-center-links { opacity: 0; pointer-events: none; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 15px; padding: 8px 12px; border-radius: 8px; transition: color 0.2s, background-color 0.2s; white-space: nowrap; }
+        .nav-link:hover { color: var(--text-primary); background-color: var(--bg-tertiary); }
+        .nav-link.active { color: var(--text-primary); font-weight: 600; }
+        .nav-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 16px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+        #navbar.scrolled .nav-title { opacity: 1; }
+        .side-panel { position: fixed; top: 0; bottom: 0; z-index: 200; width: 300px; max-width: 85%; background-color: var(--bg-glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); box-shadow: var(--shadow-md); transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); overflow: hidden; padding: 16px; border-right: 1px solid var(--separator); display: flex; flex-direction: column; }
+        .side-panel.right-panel { left: auto; right: 0; transform: translateX(100%); border-right: none; border-left: 1px solid var(--separator); }
+        .side-panel.active { transform: translateX(0); }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-shrink: 0; padding: 0 8px; }
+        .panel-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .close-btn { background: var(--bg-tertiary); border: none; color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .panel-content { flex-grow: 1; overflow-y: auto; }
+        .panel-list { list-style: none; }
+        .panel-link, .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; color: var(--text-primary); text-decoration: none; font-size: 17px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
+        .panel-link:hover, .menu-item:hover { background-color: var(--bg-tertiary); }
+        .panel-link.active { background-color: var(--accent); color: white; font-weight: 600; }
+        .menu-item .menu-item-arrow { margin-left: auto; color: var(--text-secondary); }
+        .menu-back-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 17px; font-weight: 500; display: flex; align-items: center; }
+        .dropdown-menu { position: absolute; top: 50px; right: 24px; z-index: 110; width: 300px; background-color: var(--bg-glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--separator); padding: 8px; opacity: 0; transform: translateY(-10px); transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
+        .dropdown-menu.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .mobile-only { display: none !important; }
+        @media (max-width: 1024px) { .desktop-only { display: none !important; } .mobile-only { display: flex !important; } }
+        .backdrop { position: fixed; inset: 0; z-index: 150; background: rgba(0, 0, 0, 0.2); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+        .backdrop.active { opacity: 1; pointer-events: all; }
+
+        /* --- Stili Generali Pagina --- */
+        .content-wrapper { max-width: 800px; margin: 0 auto; padding: 80px 16px 40px; }
+        .main-header { margin-bottom: 32px; text-align: center; }
+        .main-header h1 { font-size: 34px; font-weight: 700; margin-bottom: 8px; }
+        .description { font-size: 17px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+        .glass-card { background: var(--bg-secondary); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--separator); }
+        main { display: flex; flex-direction: column; gap: 24px; }
+        
+        /* --- NUOVI STILI per il Tool Flip --- */
+        .upload-placeholder { padding: 48px 24px; text-align: center; cursor: pointer; border: 2px dashed var(--separator); border-radius: var(--radius-lg); transition: all 0.3s; }
+        .upload-placeholder:hover { border-color: var(--accent); }
+        .upload-icon { width: 48px; height: 48px; color: var(--text-secondary); margin-bottom: 16px; }
+        .upload-text { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+        
+        .workspace { display: none; flex-direction: column; gap: 16px; }
+        .canvas-container { width: 100%; background-color: var(--bg-primary); border-radius: var(--radius-lg); padding: 16px; text-align: center; }
+        #imageCanvas { max-width: 100%; border-radius: 12px; }
+        
+        .flip-controls { padding: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .flip-btn { flex: 1; min-width: 150px; padding: 16px; border: none; background: var(--accent); color: white; font-size: 17px; font-weight: 600; cursor: pointer; border-radius: 12px; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .flip-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .flip-btn.secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+        
+        #resultsContainer { text-align: center; }
+        .result-card a { display: inline-block; padding: 12px 24px; background: var(--accent); color: white; text-decoration: none; font-weight: 600; border-radius: 12px; }
+
+        /* --- Footer (Invariato) --- */
+        .site-footer { padding: 40px 24px; margin-top: 40px; background: var(--bg-secondary); border-top: 1px solid var(--separator); color: var(--text-secondary); text-align: center; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <aside class="side-panel left-panel" id="leftNavPanel">
+        <div class="panel-header">
+            <h3 class="panel-title" data-translate-key="siteNav">Navigazione</h3>
+            <button class="close-btn" data-target="leftNavPanel">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+            </button>
+        </div>
+        <div class="panel-content"><ul class="panel-list" id="siteNavList"></ul></div>
+    </aside>
+
+    <aside class="side-panel right-panel" id="rightFunctionsPanel"></aside>
+    <div class="dropdown-menu" id="functionsDropdown"></div>
+
+    <nav id="navbar">
+        <button class="nav-btn mobile-only" id="leftMenuBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+        </button>
+        <div class="nav-placeholder desktop-only"></div>
+        <div class="nav-center-links desktop-only" id="desktopNavLinks"></div>
+        <div class="nav-title" data-translate-key="toolName_flip">CronoTools - Specchia Immagini</div>
+        <button class="nav-btn" id="rightMenuBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
+        </button>
+    </nav>
+
+    <div class="content-wrapper">
+        <header class="main-header">
+            <h1 data-translate-key="mainTitle_flip">Specchia Immagini</h1>
+            <p class="description" data-translate-key="description_flip">Carica un'immagine per specchiarla in orizzontale o in verticale. Ideale per selfie, loghi e creatività.</p>
+        </header>
+        <main>
+            <div class="glass-card" id="uploadCard">
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                    <svg class="upload-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <p class="upload-text" data-translate-key="uploadAction">Clicca o trascina un'immagine</p>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" hidden>
+            </div>
+
+            <div class="workspace" id="workspace">
+                <div class="canvas-container">
+                    <canvas id="imageCanvas"></canvas>
+                </div>
+                <div class="glass-card flip-controls">
+                    <button class="flip-btn" id="flipHorizontalBtn" data-translate-key="flipHorizontal">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V4M5 12h14M19 16l-4-4 4-4M5 8l4 4-4 4"/></svg>
+                        Orizzontale
+                    </button>
+                    <button class="flip-btn" id="flipVerticalBtn" data-translate-key="flipVertical">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h20M12 5v14M16 19l-4-4-4 4M8 5l4 4 4-4"/></svg>
+                        Verticale
+                    </button>
+                </div>
+                <div class="glass-card flip-controls">
+                    <button class="flip-btn" id="downloadBtn" data-translate-key="download">Salva Immagine</button>
+                    <button class="flip-btn secondary" id="resetBtn" data-translate-key="resetBtn">Carica un'altra</button>
+                </div>
+            </div>
+            
+            <div id="resultsContainer"></div>
+        </main>
+    </div>
+    
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div>
+                <h4 data-translate-key="footer_title_cronotools">CronoTools</h4>
+                <p data-translate-key="footer_desc_cronotools">CronoTools è una suite di strumenti online gratuiti progettati per essere veloci, affidabili e rispettosi della tua privacy. Tutte le operazioni vengono eseguite localmente nel tuo browser, garantendo che i tuoi dati non lascino mai il tuo dispositivo.</p>
+            </div>
+            <div>
+                <h4 data-translate-key="footer_title_cronoshop">Visita CronoShop.eu</h4>
+                <p data-translate-key="footer_desc_cronoshop">Scopri il nostro e-commerce <a href="https://cronoshop.eu" target="_blank" rel="noopener noreferrer">CronoShop.eu</a> per una vasta gamma di prodotti di alta qualità. Supporta il nostro lavoro e trova fantastiche offerte.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CronoTools. Tutti i diritti riservati.</p>
+        </div>
+    </footer>
+    
+    <div class="backdrop" id="backdrop"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dom = {
+                navbar: document.getElementById('navbar'),
+                largeTitle: document.querySelector('.main-header h1'),
+                leftMenuBtn: document.getElementById('leftMenuBtn'),
+                rightMenuBtn: document.getElementById('rightMenuBtn'),
+                leftNavPanel: document.getElementById('leftNavPanel'),
+                siteNavList: document.getElementById('siteNavList'),
+                desktopNavLinks: document.getElementById('desktopNavLinks'),
+                rightFunctionsPanel: document.getElementById('rightFunctionsPanel'),
+                functionsDropdown: document.getElementById('functionsDropdown'),
+                backdrop: document.getElementById('backdrop'),
+                // Elementi del tool Flip
+                uploadCard: document.getElementById('uploadCard'),
+                uploadPlaceholder: document.getElementById('uploadPlaceholder'),
+                fileInput: document.getElementById('fileInput'),
+                workspace: document.getElementById('workspace'),
+                imageCanvas: document.getElementById('imageCanvas'),
+                flipHorizontalBtn: document.getElementById('flipHorizontalBtn'),
+                flipVerticalBtn: document.getElementById('flipVerticalBtn'),
+                downloadBtn: document.getElementById('downloadBtn'),
+                resetBtn: document.getElementById('resetBtn'),
+            };
+
+            let currentLang = 'it';
+            const siteFiles = ["index.html", "base64.html", "crop-immagini.html", "flip-immagini.html", "ridimensiona.html", "ruota-immagini.html", "scala-grigi.html", "share.html"];
+            const translations = {
+                it: {
+                    toolName_flip: "CronoTools - Specchia", mainTitle_flip: "Specchia Immagini", description_flip: "Carica un'immagine per specchiarla in orizzontale o in verticale. Ideale per selfie, loghi e creatività.",
+                    uploadAction: "Clicca o trascina un'immagine", flipHorizontal: "Orizzontale", flipVertical: "Verticale", download: "Salva Immagine", resetBtn: "Carica un'altra",
+                    siteNav: "Navigazione", back: "Indietro", functions: "Funzioni", theme: "Tema", language: "Lingua", light: "Default Chiaro", dark: "Default Scuro", midnight: "Midnight", slate: "Slate", latte: "Latte",
+                    nav_index: "Converti Immagini", nav_base64: "Base64", nav_crop_immagini: "Ritaglia", nav_flip_immagini: "Specchia", nav_ridimensiona: "Ridimensiona", nav_ruota_immagini: "Ruota", nav_scala_grigi: "Scala di Grigi", nav_share: "Condividi"
+                },
+                en: {
+                    toolName_flip: "CronoTools - Flip Images", mainTitle_flip: "Flip Images", description_flip: "Upload an image to flip it horizontally or vertically. Perfect for selfies, logos, and creative work.",
+                    uploadAction: "Click or drag an image", flipHorizontal: "Horizontal", flipVertical: "Vertical", download: "Save Image", resetBtn: "Upload Another",
+                    siteNav: "Navigation", back: "Back", functions: "Functions", theme: "Theme", language: "Language", light: "Default Light", dark: "Default Dark", midnight: "Midnight", slate: "Slate", latte: "Latte",
+                    nav_index: "Image Converter", nav_base64: "Base64", nav_crop_immagini: "Crop", nav_flip_immagini: "Flip", nav_ridimensiona: "Resize", nav_ruota_immagini: "Rotate", nav_scala_grigi: "Grayscale", nav_share: "Share"
+                }
+            };
+            
+            // --- LOGICA DI NAVIGAZIONE E MENU (INVARIATA E COMPLETA) ---
+            (function() {
+                window.addEventListener('scroll', () => { dom.navbar.classList.toggle('scrolled', window.scrollY > 20); if (dom.largeTitle) dom.largeTitle.classList.toggle('scrolled', window.scrollY > 20); }, { passive: true });
+                const togglePanel = (panel) => { closeAllPanels(); panel.classList.add('active'); dom.backdrop.classList.add('active'); document.body.classList.add('no-scroll'); };
+                const closeAllPanels = () => { document.querySelectorAll('.side-panel.active, .dropdown-menu.active').forEach(p => p.classList.remove('active')); dom.backdrop.classList.remove('active'); document.body.classList.remove('no-scroll'); };
+                dom.leftMenuBtn.addEventListener('click', () => togglePanel(dom.leftNavPanel));
+                dom.backdrop.addEventListener('click', closeAllPanels);
+                document.querySelectorAll('.close-btn').forEach(btn => { if(btn) btn.addEventListener('click', closeAllPanels) });
+                const functionsMenuManager = { isDesktop: window.innerWidth > 1024, container: null, history: [], init() { window.addEventListener('resize', () => { this.isDesktop = window.innerWidth > 1024; closeAllPanels(); }); dom.rightMenuBtn.addEventListener('click', (e) => this.toggle(e)); }, toggle(e) { e.stopPropagation(); this.container = this.isDesktop ? dom.functionsDropdown : dom.rightFunctionsPanel; const isActive = this.container.classList.contains('active'); closeAllPanels(); if (!isActive) { this.history = []; this.render(this.getMainMenuItems(), translations[currentLang].functions); this.container.classList.add('active'); if (this.isDesktop) { document.addEventListener('click', (event) => { if (!this.container.contains(event.target) && !dom.rightMenuBtn.contains(event.target)) closeAllPanels(); }, { once: true }); } else { dom.backdrop.classList.add('active'); document.body.classList.add('no-scroll'); } } }, render(items, title) { this.container.innerHTML = ''; const header = document.createElement('div'); header.className = 'panel-header'; if (this.history.length > 0) { const backBtn = document.createElement('button'); backBtn.className = 'menu-back-btn'; backBtn.innerHTML = `‹ <span>${translations[currentLang].back}</span>`; backBtn.onclick = () => this.back(); header.appendChild(backBtn); } const panelTitle = document.createElement('h3'); panelTitle.className = 'panel-title'; panelTitle.textContent = title; header.appendChild(panelTitle); if (!this.isDesktop) { const closeBtn = document.createElement('button'); closeBtn.className = 'close-btn'; closeBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>'; closeBtn.onclick = closeAllPanels; header.appendChild(closeBtn); } const list = document.createElement('ul'); list.className = 'panel-list'; items.forEach(itemData => { const li = document.createElement('li'); li.className = 'menu-item'; li.innerHTML = `${itemData.icon || ''}<span class="menu-item-label">${itemData.label}</span>${itemData.submenu ? '<svg class="menu-item-arrow" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"></path></svg>' : ''}`; li.onclick = (e) => { e.stopPropagation(); if (itemData.submenu) { this.history.push({items, title}); this.render(itemData.submenu(), itemData.label); } else { if (itemData.action) itemData.action(); closeAllPanels(); } }; list.appendChild(li); }); this.container.append(header, list); }, back() { const prevState = this.history.pop(); if (prevState) this.render(prevState.items, prevState.title); }, getMainMenuItems: () => [ { label: translations[currentLang].theme, submenu: () => [ { label: translations[currentLang].light, action: () => setTheme('light') }, { label: translations[currentLang].dark, action: () => setTheme('dark') }, { label: translations[currentLang].midnight, action: () => setTheme('midnight') }, { label: translations[currentLang].slate, action: () => setTheme('slate') }, { label: translations[currentLang].latte, action: () => setTheme('latte') }, ]}, { label: translations[currentLang].language, submenu: () => [ { label: 'Italiano', action: () => setLanguage('it') }, { label: 'English', action: () => setLanguage('en') }, ]}] };
+                functionsMenuManager.init();
+                window.setTheme = (theme) => { document.body.setAttribute('data-theme', theme); localStorage.setItem('editorTheme', theme); };
+                window.setLanguage = (lang) => { currentLang = lang; localStorage.setItem('editorLang', lang); document.querySelectorAll('[data-translate-key]').forEach(el => { const key = el.dataset.translateKey; if (translations[lang] && translations[lang][key]) { el.textContent = translations[lang][key]; } }); populateSiteNav(); if (functionsMenuManager.container && functionsMenuManager.container.classList.contains('active')) { functionsMenuManager.history = []; functionsMenuManager.render(functionsMenuManager.getMainMenuItems(), translations[currentLang].functions); } };
+                window.populateSiteNav = () => { const targets = [dom.siteNavList, dom.desktopNavLinks]; targets.forEach(t => { if (t) t.innerHTML = ''; }); const fileMap = { "index.html": "nav_index", "base64.html": "nav_base64", "crop-immagini.html": "nav_crop_immagini", "flip-immagini.html": "nav_flip_immagini", "ridimensiona.html": "nav_ridimensiona", "ruota-immagini.html": "nav_ruota_immagini", "scala-grigi.html": "nav_scala_grigi", "share.html": "nav_share"}; Object.entries(fileMap).forEach(([file, key]) => { const label = (translations[currentLang] && translations[currentLang][key]) || key; const li = document.createElement('li'); const aMobile = document.createElement('a'); aMobile.href = file; aMobile.className = 'panel-link'; if (file === 'flip-immagini.html') aMobile.classList.add('active'); aMobile.textContent = label; li.appendChild(aMobile); if (dom.siteNavList) dom.siteNavList.appendChild(li); const aDesktop = document.createElement('a'); aDesktop.href = file; aDesktop.className = 'nav-link'; if (file === 'flip-immagini.html') aDesktop.classList.add('active'); aDesktop.textContent = label; if (dom.desktopNavLinks) dom.desktopNavLinks.appendChild(aDesktop); }); };
+            })();
+
+            // --- NUOVA LOGICA per il Tool Flip ---
+
+            const ctx = dom.imageCanvas.getContext('2d');
+            let originalImage = null;
+            let originalFileName = '';
+            let isFlippedHorizontal = false;
+            let isFlippedVertical = false;
+
+            function handleImageUpload(file) {
+                if (!file || !file.type.startsWith('image/')) return;
+                
+                const reader = new FileReader();
+                reader.onload = e => {
+                    originalImage = new Image();
+                    originalImage.onload = () => {
+                        originalFileName = file.name;
+                        showWorkspace();
+                        drawImage();
+                    };
+                    originalImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function showWorkspace() {
+                dom.uploadCard.style.display = 'none';
+                dom.workspace.style.display = 'flex';
+            }
+            
+            function resetWorkspace() {
+                dom.uploadCard.style.display = 'block';
+                dom.workspace.style.display = 'none';
+                dom.fileInput.value = '';
+                originalImage = null;
+                isFlippedHorizontal = false;
+                isFlippedVertical = false;
+            }
+
+            function drawImage() {
+                if (!originalImage) return;
+
+                const canvas = dom.imageCanvas;
+                canvas.width = originalImage.width;
+                canvas.height = originalImage.height;
+
+                ctx.save(); // Salva lo stato del contesto
+
+                // Applica le trasformazioni di flip
+                const scaleH = isFlippedHorizontal ? -1 : 1;
+                const scaleV = isFlippedVertical ? -1 : 1;
+                const translateX = isFlippedHorizontal ? -canvas.width : 0;
+                const translateY = isFlippedVertical ? -canvas.height : 0;
+                
+                ctx.scale(scaleH, scaleV);
+                ctx.translate(translateX, translateY);
+                
+                ctx.drawImage(originalImage, 0, 0);
+
+                ctx.restore(); // Ripristina lo stato del contesto
+            }
+            
+            // --- Event Listeners ---
+            
+            dom.uploadPlaceholder.addEventListener('click', () => dom.fileInput.click());
+            dom.fileInput.addEventListener('change', (e) => handleImageUpload(e.target.files[0]));
+            
+            // Gestione Drag & Drop
+            ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dom.uploadPlaceholder.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if(eventName === 'drop') {
+                        handleImageUpload(e.dataTransfer.files[0]);
+                    }
+                });
+            });
+
+            dom.flipHorizontalBtn.addEventListener('click', () => {
+                isFlippedHorizontal = !isFlippedHorizontal;
+                drawImage();
+            });
+
+            dom.flipVerticalBtn.addEventListener('click', () => {
+                isFlippedVertical = !isFlippedVertical;
+                drawImage();
+            });
+
+            dom.resetBtn.addEventListener('click', resetWorkspace);
+
+            dom.downloadBtn.addEventListener('click', () => {
+                if (!originalImage) return;
+                
+                const link = document.createElement('a');
+                link.download = `flipped_${originalFileName}`;
+                link.href = dom.imageCanvas.toDataURL('image/png');
+                link.click();
+            });
+            
+            // --- Inizializzazione ---
+            const savedTheme = localStorage.getItem('editorTheme') || 'dark';
+            window.setTheme(savedTheme);
+            const savedLang = localStorage.getItem('editorLang') || 'it';
+            window.setLanguage(savedLang);
+        });
+    </script>
+</body>
+</html>
