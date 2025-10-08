@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Base64 Converter - CronoTools</title>
+    <style>
+        /* Stile CSS v15.0 - Corretto e Stabile */
+        :root, :root[data-theme="light"] { 
+            --bg-primary: #f2f2f7; --bg-secondary: #ffffff; --bg-tertiary: #e5e5ea; 
+            --bg-glass: rgba(255, 255, 255, 0.75); --text-primary: #000000; 
+            --text-secondary: rgba(60, 60, 67, 0.6); --accent: #007aff; 
+            --separator: rgba(60, 60, 67, 0.15); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12); 
+            --radius-lg: 20px; 
+        }
+        [data-theme="dark"] { 
+            --bg-primary: #000000; --bg-secondary: #1c1c1e; --bg-tertiary: #2c2c2e; 
+            --bg-glass: rgba(28, 28, 30, 0.8); --text-primary: #ffffff; 
+            --text-secondary: rgba(235, 235, 245, 0.6); --accent: #0a84ff; 
+            --separator: rgba(84, 84, 88, 0.4); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4); 
+        }
+        [data-theme="midnight"] { 
+            --bg-primary: #000000; --bg-secondary: #161618; --bg-tertiary: #2a2a2c; 
+            --bg-glass: rgba(18, 18, 18, 0.85); --text-primary: #ffffff; 
+            --text-secondary: rgba(255, 255, 255, 0.55); --accent: #0a84ff; 
+            --separator: #272729; --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        [data-theme="slate"] { 
+            --bg-primary: #0a192f; --bg-secondary: #112240; --bg-tertiary: #233554; 
+            --bg-glass: rgba(10, 25, 47, 0.85); --text-primary: #ccd6f6;
+            --text-secondary: #8892b0; --accent: #f97316; 
+            --separator: #112240; --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        [data-theme="latte"] { 
+            --bg-primary: #EFF1F5; --bg-secondary: #FFFFFF; --bg-tertiary: #E6E9EF; 
+            --bg-glass: rgba(239, 241, 245, 0.8); --text-primary: #4C4F69; 
+            --text-secondary: #6C6F84; --accent: #8b5cf6; 
+            --separator: #DCE0E8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg-primary); color: var(--text-primary); 
+            transition: background 0.3s, color 0.3s; 
+            -webkit-font-smoothing: antialiased;
+        }
+        body.no-scroll { overflow: hidden; }
+
+        /* --- Navbar --- */
+        #navbar { 
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100; 
+            display: flex; align-items: center; justify-content: space-between; 
+            background: transparent; border-bottom: 1px solid transparent; 
+            height: 60px; padding: 0 24px; 
+            transition: height 0.3s, background-color 0.3s, border-color 0.3s; 
+        }
+        #navbar.scrolled { 
+            height: 40px; background-color: var(--bg-glass); 
+            backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); 
+            border-bottom-color: var(--separator); 
+        }
+        .nav-btn { background: none; border: none; color: var(--accent); cursor: pointer; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background-color 0.2s; }
+        .nav-btn:hover { background-color: var(--bg-tertiary); }
+        .nav-placeholder { width: 44px; flex-shrink: 0; }
+        .nav-center-links { display: flex; gap: 8px; transition: opacity 0.3s, transform 0.3s; }
+        #navbar.scrolled .nav-center-links { opacity: 0; transform: scale(0.95); pointer-events: none; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 15px; padding: 8px 12px; border-radius: 8px; transition: color 0.2s, background-color 0.2s; white-space: nowrap; }
+        .nav-link:hover { color: var(--text-primary); background-color: var(--bg-tertiary); }
+        .nav-link.active { color: var(--text-primary); font-weight: 600; }
+        .nav-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 16px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+        #navbar.scrolled .nav-title { opacity: 1; }
+
+        /* --- Menu Laterali --- */
+        .side-panel { 
+            position: fixed; top: 0; bottom: 0; z-index: 200; 
+            width: 300px; max-width: 85%; 
+            background-color: var(--bg-glass); 
+            backdrop-filter: saturate(180%) blur(20px); 
+            -webkit-backdrop-filter: saturate(180%) blur(20px); 
+            box-shadow: var(--shadow-md); 
+            transform: translateX(-100%); 
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); 
+            overflow: hidden; 
+            padding: 16px; 
+            border-right: 1px solid var(--separator); 
+            display: flex; flex-direction: column; 
+        }
+        .side-panel.right-panel { left: auto; right: 0; transform: translateX(100%); border-right: none; border-left: 1px solid var(--separator); }
+        .side-panel.active { transform: translateX(0); }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-shrink: 0; padding: 0 8px; }
+        .panel-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .close-btn { background: var(--bg-tertiary); border: none; color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s, background-color 0.3s; }
+        .close-btn:active { transform: scale(0.9); }
+        .panel-content { flex-grow: 1; overflow-y: auto; }
+        .panel-list { list-style: none; }
+        .panel-link, .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; color: var(--text-primary); text-decoration: none; font-size: 17px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
+        .panel-link:hover, .menu-item:hover { background-color: var(--bg-tertiary); }
+        .panel-link.active { background-color: var(--accent); color: white; font-weight: 600; }
+        .menu-item .menu-item-arrow { margin-left: auto; color: var(--text-secondary); }
+        .menu-back-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 17px; font-weight: 500; display: flex; align-items: center; padding-right: 8px; }
+
+        /* --- Dropdown (Desktop) --- */
+        .dropdown-menu { position: absolute; top: 60px; right: 24px; z-index: 110; width: 300px; background-color: var(--bg-glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--separator); padding: 8px; opacity: 0; transform: translateY(-10px); transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
+        .dropdown-menu.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        /* --- Responsive --- */
+        .mobile-only { display: none !important; }
+        @media (max-width: 1024px) {
+            .desktop-only { display: none !important; }
+            .mobile-only { display: flex !important; }
+        }
+
+        /* --- Backdrop --- */
+        .backdrop { position: fixed; inset: 0; z-index: 150; background: rgba(0, 0, 0, 0.2); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+        .backdrop.active { opacity: 1; pointer-events: all; }
+
+        /* --- Stili Pagina --- */
+        .content-wrapper { max-width: 700px; margin: 0 auto; padding: 80px 16px 40px; }
+        .main-header { margin-bottom: 32px; }
+        .main-header h1 { font-size: 34px; font-weight: 700; margin-bottom: 8px; }
+        .description { font-size: 17px; color: var(--text-secondary); }
+        .glass-card { background: var(--bg-secondary); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--separator); }
+        main { display: flex; flex-direction: column; gap: 24px; }
+        .section-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+        
+        /* --- Stili Tool Base64 --- */
+        .base64-card { padding: 16px; }
+        .io-panel { display: flex; flex-direction: column; gap: 16px; }
+        .io-header { display: flex; justify-content: space-between; align-items: center; }
+        .io-title { font-size: 17px; font-weight: 600; }
+        .io-actions button { background: var(--bg-tertiary); color: var(--accent); border: none; border-radius: 8px; padding: 6px 12px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+        .io-actions button:hover { background-color: var(--accent); color: white; }
+        .io-textarea { width: 100%; min-height: 150px; padding: 12px; border: 1px solid var(--separator); border-radius: 12px; background: var(--bg-primary); color: var(--text-primary); font-family: "SF Mono", "Menlo", monospace; font-size: 14px; resize: vertical; }
+        .io-textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent); }
+        .action-buttons { display: flex; gap: 12px; }
+        .action-buttons button { flex: 1; padding: 16px; border: none; background: var(--accent); color: white; font-size: 17px; font-weight: 600; cursor: pointer; border-radius: 12px; transition: transform 0.2s; }
+        .action-buttons button:active { transform: scale(0.98); }
+        .action-buttons button.secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+        .file-input-label { padding: 16px; background: var(--bg-tertiary); color: var(--text-primary); text-align: center; border-radius: 12px; cursor: pointer; font-weight: 500; transition: background-color 0.2s; }
+        .file-input-label:hover { background-color: color-mix(in srgb, var(--bg-tertiary) 80%, black); }
+
+        /* --- Footer --- */
+        .site-footer { padding: 40px 24px; margin-top: 40px; background: var(--bg-secondary); border-top: 1px solid var(--separator); color: var(--text-secondary); text-align: center; }
+        .footer-content { max-width: 700px; margin: 0 auto; display: grid; gap: 24px; }
+        .footer-content h4 { font-size: 18px; color: var(--text-primary); margin-bottom: 8px; }
+        .footer-content p { font-size: 15px; line-height: 1.6; }
+        .footer-content a { color: var(--accent); text-decoration: none; font-weight: 500; }
+        .footer-bottom { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--separator); font-size: 13px; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <aside class="side-panel left-panel" id="leftNavPanel">
+        <div class="panel-header">
+            <h3 class="panel-title" data-translate-key="siteNav">Navigazione</h3>
+            <button class="close-btn" data-target="leftNavPanel">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+            </button>
+        </div>
+        <div class="panel-content">
+            <ul class="panel-list" id="siteNavList"></ul>
+        </div>
+    </aside>
+
+    <aside class="side-panel right-panel" id="rightFunctionsPanel"></aside>
+    
+    <div class="dropdown-menu" id="functionsDropdown"></div>
+
+    <nav id="navbar">
+        <button class="nav-btn mobile-only" id="leftMenuBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+        </button>
+        <div class="nav-placeholder desktop-only"></div>
+        <div class="nav-center-links desktop-only" id="desktopNavLinks"></div>
+        <div class="nav-title" data-translate-key="toolName_base64">CronoTools - Base64</div>
+        <button class="nav-btn" id="rightMenuBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
+        </button>
+    </nav>
+
+    <div class="content-wrapper">
+        <header class="main-header">
+            <h1 data-translate-key="mainTitle_base64">Base64 Converter</h1>
+            <p class="description" data-translate-key="description_base64">Codifica e decodifica testi o file in formato Base64. Un tool veloce e sicuro che opera interamente nel tuo browser.</p>
+        </header>
+        <main>
+            <div class="glass-card base64-card">
+                <div class="io-panel">
+                    <div class="io-header">
+                        <span class="io-title" data-translate-key="inputTitle">Input (Testo o File)</span>
+                        <div class="io-actions">
+                            <button id="pasteBtn" data-translate-key="paste">Incolla</button>
+                            <button id="clearInputBtn" data-translate-key="clear">Pulisci</button>
+                        </div>
+                    </div>
+                    <textarea id="inputText" class="io-textarea" placeholder="Scrivi o incolla il testo qui..."></textarea>
+                    <label class="file-input-label" for="fileInput" data-translate-key="uploadFile">Oppure, carica un file...</label>
+                    <input type="file" id="fileInput" hidden>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="encodeBtn" data-translate-key="encode">Codifica in Base64 ↓</button>
+                <button id="decodeBtn" class="secondary" data-translate-key="decode">↑ Decodifica da Base64</button>
+            </div>
+
+            <div class="glass-card base64-card">
+                 <div class="io-panel">
+                    <div class="io-header">
+                        <span class="io-title" data-translate-key="outputTitle">Output</span>
+                        <div class="io-actions">
+                            <button id="copyBtn" data-translate-key="copy">Copia</button>
+                            <button id="downloadBtn" data-translate-key="download">Scarica</button>
+                        </div>
+                    </div>
+                    <textarea id="outputText" class="io-textarea" readonly placeholder="Il risultato apparirà qui..."></textarea>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div>
+                <h4 data-translate-key="footer_title_cronotools">CronoTools</h4>
+                <p data-translate-key="footer_desc_cronotools">CronoTools è una suite di strumenti online gratuiti progettati per essere veloci, affidabili e rispettosi della tua privacy. Tutte le operazioni vengono eseguite localmente nel tuo browser, garantendo che i tuoi dati non lascino mai il tuo dispositivo.</p>
+            </div>
+            <div>
+                <h4 data-translate-key="footer_title_cronoshop">Visita CronoShop.eu</h4>
+                <p data-translate-key="footer_desc_cronoshop">Scopri il nostro e-commerce <a href="https://cronoshop.eu" target="_blank" rel="noopener noreferrer">CronoShop.eu</a> per una vasta gamma di prodotti di alta qualità. Supporta il nostro lavoro e trova fantastiche offerte.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 CronoTools. Tutti i diritti riservati.</p>
+        </div>
+    </footer>
+    
+    <div class="backdrop" id="backdrop"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ELEMENTI DOM ---
+            const dom = {
+                navbar: document.getElementById('navbar'),
+                largeTitle: document.querySelector('.main-header h1'),
+                leftMenuBtn: document.getElementById('leftMenuBtn'),
+                rightMenuBtn: document.getElementById('rightMenuBtn'),
+                leftNavPanel: document.getElementById('leftNavPanel'),
+                siteNavList: document.getElementById('siteNavList'),
+                desktopNavLinks: document.getElementById('desktopNavLinks'),
+                rightFunctionsPanel: document.getElementById('rightFunctionsPanel'),
+                functionsDropdown: document.getElementById('functionsDropdown'),
+                backdrop: document.getElementById('backdrop'),
+                inputText: document.getElementById('inputText'),
+                outputText: document.getElementById('outputText'),
+                fileInput: document.getElementById('fileInput'),
+                encodeBtn: document.getElementById('encodeBtn'),
+                decodeBtn: document.getElementById('decodeBtn'),
+                pasteBtn: document.getElementById('pasteBtn'),
+                clearInputBtn: document.getElementById('clearInputBtn'),
+                copyBtn: document.getElementById('copyBtn'),
+                downloadBtn: document.getElementById('downloadBtn'),
+            };
+
+            // --- STATO GLOBALE E TRADUZIONI ---
+            let currentLang = 'it';
+            let lastFileName = 'download.txt';
+            const siteFiles = ["index.html", "base64.html", "crop-immagini.html", "flip-immagini.html", "ridimensiona.html", "ruota-immagini.html", "scala-grigi.html", "share.html"];
+            const translations = {
+                it: {
+                    toolName_base64: "CronoTools - Base64", mainTitle_base64: "Base64 Converter", description_base64: "Codifica e decodifica testi o file in formato Base64. Un tool veloce e sicuro che opera interamente nel tuo browser.",
+                    inputTitle: "Input (Testo o File)", paste: "Incolla", clear: "Pulisci", uploadFile: "Oppure, carica un file...",
+                    encode: "Codifica in Base64 ↓", decode: "↑ Decodifica da Base64", outputTitle: "Output",
+                    copy: "Copia", download: "Scarica", siteNav: "Navigazione", back: "Indietro", functions: "Funzioni", 
+                    theme: "Tema", language: "Lingua", light: "Default Chiaro", dark: "Default Scuro", midnight: "Midnight", 
+                    slate: "Slate", latte: "Latte", 
+                    nav_index: "Converti Immagini", nav_base64: "Base64", nav_crop_immagini: "Ritaglia", 
+                    nav_flip_immagini: "Specchia", nav_ridimensiona: "Ridimensiona", nav_ruota_immagini: "Ruota", 
+                    nav_scala_grigi: "Scala di Grigi", nav_share: "Condividi",
+                    footer_title_cronotools: "CronoTools", footer_desc_cronotools: "CronoTools è una suite di strumenti online gratuiti progettati per essere veloci, affidabili e rispettosi della tua privacy. Tutte le operazioni vengono eseguite localmente nel tuo browser, garantendo che i tuoi dati non lascino mai il tuo dispositivo.",
+                    footer_title_cronoshop: "Visita CronoShop.eu", footer_desc_cronoshop: "Scopri il nostro e-commerce CronoShop.eu per una vasta gamma di prodotti di alta qualità. Supporta il nostro lavoro e trova fantastiche offerte."
+                },
+                en: {
+                    toolName_base64: "CronoTools - Base64", mainTitle_base64: "Base64 Converter", description_base64: "Encode and decode text or files in Base64 format. A fast and secure tool that runs entirely in your browser.",
+                    inputTitle: "Input (Text or File)", paste: "Paste", clear: "Clear", uploadFile: "Or, upload a file...",
+                    encode: "Encode to Base64 ↓", decode: "↑ Decode from Base64", outputTitle: "Output",
+                    copy: "Copy", download: "Download", siteNav: "Navigation", back: "Back", functions: "Functions", 
+                    theme: "Theme", language: "Language", light: "Default Light", dark: "Default Dark", midnight: "Midnight", 
+                    slate: "Slate", latte: "Latte", 
+                    nav_index: "Image Converter", nav_base64: "Base64", nav_crop_immagini: "Crop", 
+                    nav_flip_immagini: "Flip", nav_ridimensiona: "Resize", nav_ruota_immagini: "Rotate", 
+                    nav_scala_grigi: "Grayscale", nav_share: "Share",
+                    footer_title_cronotools: "CronoTools", footer_desc_cronotools: "CronoTools is a suite of free online tools designed to be fast, reliable, and respectful of your privacy. All operations are performed locally in your browser, ensuring your data never leaves your device.",
+                    footer_title_cronoshop: "Visit CronoShop.eu", footer_desc_cronoshop: "Discover our e-commerce CronoShop.eu for a wide range of high-quality products. Support our work and find great deals."
+                }
+            };
+            
+            // --- LOGICA DI NAVIGAZIONE E MENU (COMPLETA E FUNZIONANTE) ---
+            
+            window.addEventListener('scroll', () => { 
+                const isScrolled = window.scrollY > 20;
+                dom.navbar.classList.toggle('scrolled', isScrolled); 
+                if (dom.largeTitle) dom.largeTitle.classList.toggle('scrolled', isScrolled); 
+            }, { passive: true });
+
+            const togglePanel = (panel) => { 
+                closeAllPanels(); 
+                panel.classList.add('active'); 
+                dom.backdrop.classList.add('active'); 
+                document.body.classList.add('no-scroll'); 
+            };
+
+            const closeAllPanels = () => { 
+                document.querySelectorAll('.side-panel.active, .dropdown-menu.active').forEach(p => p.classList.remove('active')); 
+                dom.backdrop.classList.remove('active'); 
+                document.body.classList.remove('no-scroll'); 
+            };
+
+            dom.leftMenuBtn.addEventListener('click', () => togglePanel(dom.leftNavPanel));
+            dom.backdrop.addEventListener('click', closeAllPanels);
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                if(btn) btn.addEventListener('click', closeAllPanels)
+            });
+
+            const functionsMenuManager = {
+                isDesktop: window.innerWidth > 1024,
+                container: null,
+                history: [],
+                init() {
+                    window.addEventListener('resize', () => { this.isDesktop = window.innerWidth > 1024; closeAllPanels(); });
+                    dom.rightMenuBtn.addEventListener('click', (e) => this.toggle(e));
+                },
+                toggle(e) {
+                    e.stopPropagation();
+                    this.container = this.isDesktop ? dom.functionsDropdown : dom.rightFunctionsPanel;
+                    const isActive = this.container.classList.contains('active');
+                    closeAllPanels();
+                    if (!isActive) {
+                        this.history = [];
+                        this.render(this.getMainMenuItems(), translations[currentLang].functions);
+                        this.container.classList.add('active');
+                        if (this.isDesktop) {
+                            document.addEventListener('click', (event) => {
+                                if (!this.container.contains(event.target) && !dom.rightMenuBtn.contains(event.target)) {
+                                    closeAllPanels();
+                                }
+                            }, { once: true });
+                        } else {
+                             dom.backdrop.classList.add('active');
+                             document.body.classList.add('no-scroll');
+                        }
+                    }
+                },
+                render(items, title) {
+                    this.container.innerHTML = '';
+                    const header = document.createElement('div');
+                    header.className = 'panel-header';
+                    
+                    if (this.history.length > 0) {
+                        const backBtn = document.createElement('button');
+                        backBtn.className = 'menu-back-btn';
+                        backBtn.innerHTML = `‹ <span data-translate-key="back">${translations[currentLang].back}</span>`;
+                        backBtn.onclick = () => this.back();
+                        header.appendChild(backBtn);
+                    }
+                    const panelTitle = document.createElement('h3');
+                    panelTitle.className = 'panel-title';
+                    panelTitle.textContent = title;
+                    header.appendChild(panelTitle);
+                    
+                    if (!this.isDesktop) {
+                        const closeBtn = document.createElement('button');
+                        closeBtn.className = 'close-btn';
+                        closeBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>';
+                        closeBtn.onclick = closeAllPanels;
+                        header.appendChild(closeBtn);
+                    }
+                    
+                    const list = document.createElement('ul');
+                    list.className = 'panel-list';
+                    items.forEach(itemData => {
+                        const li = document.createElement('li');
+                        li.className = 'menu-item';
+                        li.innerHTML = `${itemData.icon || ''}<span class="menu-item-label">${itemData.label}</span>${itemData.submenu ? '<svg class="menu-item-arrow" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"></path></svg>' : ''}`;
+                        li.onclick = (e) => {
+                            e.stopPropagation();
+                            if (itemData.submenu) {
+                                this.history.push({items, title});
+                                this.render(itemData.submenu(), itemData.label);
+                            } else {
+                                if (itemData.action) itemData.action();
+                                closeAllPanels();
+                            }
+                        };
+                        list.appendChild(li);
+                    });
+                    this.container.append(header, list);
+                },
+                back() {
+                    const prevState = this.history.pop();
+                    if (prevState) this.render(prevState.items, prevState.title);
+                },
+                getMainMenuItems: () => [
+                    { label: translations[currentLang].theme, submenu: () => [
+                        { label: translations[currentLang].light, action: () => setTheme('light') },
+                        { label: translations[currentLang].dark, action: () => setTheme('dark') },
+                        { label: translations[currentLang].midnight, action: () => setTheme('midnight') },
+                        { label: translations[currentLang].slate, action: () => setTheme('slate') },
+                        { label: translations[currentLang].latte, action: () => setTheme('latte') },
+                    ]},
+                    { label: translations[currentLang].language, submenu: () => [
+                        { label: 'Italiano', action: () => setLanguage('it') },
+                        { label: 'English', action: () => setLanguage('en') },
+                    ]}
+                ]
+            };
+            functionsMenuManager.init();
+            
+            function setTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('editorTheme', theme); }
+            function setLanguage(lang) {
+                currentLang = lang;
+                localStorage.setItem('editorLang', lang);
+                document.querySelectorAll('[data-translate-key]').forEach(el => {
+                    const key = el.dataset.translateKey;
+                    if (translations[lang] && translations[lang][key]) {
+                        el.textContent = translations[lang][key];
+                    }
+                });
+                populateSiteNav();
+                if (functionsMenuManager.container && functionsMenuManager.container.classList.contains('active')) {
+                     functionsMenuManager.history = [];
+                     functionsMenuManager.render(functionsMenuManager.getMainMenuItems(), translations[currentLang].functions);
+                }
+            }
+
+            function populateSiteNav() {
+                const targets = [dom.siteNavList, dom.desktopNavLinks];
+                targets.forEach(t => { if (t) t.innerHTML = ''; });
+
+                const fileMap = { "index.html": "nav_index", "base64.html": "nav_base64", "crop-immagini.html": "nav_crop_immagini", "flip-immagini.html": "nav_flip_immagini", "ridimensiona.html": "nav_ridimensiona", "ruota-immagini.html": "nav_ruota_immagini", "scala-grigi.html": "nav_scala_grigi", "share.html": "nav_share"};
+                
+                Object.entries(fileMap).forEach(([file, key]) => {
+                    const label = (translations[currentLang] && translations[currentLang][key]) || key;
+                    
+                    const aMobile = document.createElement('a');
+                    aMobile.href = file; aMobile.className = 'panel-link';
+                    if (file === 'base64.html') aMobile.classList.add('active');
+                    aMobile.textContent = label;
+                    const li = document.createElement('li');
+                    li.appendChild(aMobile);
+                    if (dom.siteNavList) dom.siteNavList.appendChild(li);
+
+                    const aDesktop = document.createElement('a');
+                    aDesktop.href = file; aDesktop.className = 'nav-link';
+                    if (file === 'base64.html') aDesktop.classList.add('active');
+                    aDesktop.textContent = label;
+                    if (dom.desktopNavLinks) dom.desktopNavLinks.appendChild(aDesktop);
+                });
+            }
+            
+            // --- LOGICA SPECIFICA TOOL BASE64 ---
+            
+            dom.encodeBtn.addEventListener('click', () => {
+                try {
+                    const input = dom.inputText.value;
+                    if (!input) return;
+                    const utf8Bytes = new TextEncoder().encode(input);
+                    const base64String = btoa(String.fromCharCode(...utf8Bytes));
+                    dom.outputText.value = base64String;
+                } catch (e) {
+                    dom.outputText.value = "Error: Invalid input for UTF-8 encoding.";
+                }
+            });
+
+            dom.decodeBtn.addEventListener('click', () => {
+                try {
+                    const base64 = dom.outputText.value || dom.inputText.value;
+                    if (!base64) return;
+                    const binaryString = atob(base64);
+                    const bytes = Uint8Array.from(binaryString, m => m.codePointAt(0));
+                    dom.outputText.value = new TextDecoder().decode(bytes);
+                } catch (e) {
+                    dom.outputText.value = "Error: Invalid Base64 string.";
+                }
+            });
+
+            dom.fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                lastFileName = file.name;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const dataUrl = event.target.result;
+                    const base64Content = dataUrl.split(',')[1];
+                    dom.outputText.value = base64Content;
+                    dom.inputText.value = `[File: ${file.name}, Size: ${file.size} bytes]`;
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            dom.pasteBtn.addEventListener('click', async () => {
+                try {
+                    dom.inputText.value = await navigator.clipboard.readText();
+                } catch (err) { console.error('Failed to read clipboard:', err); }
+            });
+            
+            dom.clearInputBtn.addEventListener('click', () => {
+                dom.inputText.value = '';
+                dom.outputText.value = '';
+                dom.fileInput.value = '';
+            });
+
+            dom.copyBtn.addEventListener('click', () => {
+                if (!dom.outputText.value) return;
+                navigator.clipboard.writeText(dom.outputText.value);
+            });
+
+            dom.downloadBtn.addEventListener('click', () => {
+                const content = dom.outputText.value;
+                if (!content) return;
+                try {
+                    const binaryString = atob(content);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const blob = new Blob([bytes]);
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `decoded_${lastFileName}`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                } catch (e) {
+                    alert("Content is not valid Base64 for file download.");
+                }
+            });
+            
+            // --- Inizializzazione ---
+            const savedTheme = localStorage.getItem('editorTheme') || 'dark'; setTheme(savedTheme);
+            const savedLang = localStorage.getItem('editorLang') || 'it'; setLanguage(savedLang);
+        });
+    </script>
+</body>
+</html>
