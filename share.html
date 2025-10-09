@@ -3,48 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Condividi File - CronoTools</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <title>Condividi File P2P - CronoTools</title>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <style>
-        /* Stile CSS v16.0 - Stabile e completo */
-        :root, :root[data-theme="light"] { 
-            --bg-primary: #f2f2f7; --bg-secondary: #ffffff; --bg-tertiary: #e5e5ea; 
-            --bg-glass: rgba(255, 255, 255, 0.7); --text-primary: #000000; 
-            --text-secondary: rgba(60, 60, 67, 0.6); --accent: #007aff; 
-            --separator: rgba(60, 60, 67, 0.15); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12); 
-            --radius-lg: 20px; --success: #34c759; --danger: #ff3b30;
-        }
-        [data-theme="dark"] { 
-            --bg-primary: #000000; --bg-secondary: #1c1c1e; --bg-tertiary: #2c2c2e; 
-            --bg-glass: rgba(28, 28, 30, 0.8); --text-primary: #ffffff; 
-            --text-secondary: rgba(235, 235, 245, 0.6); --accent: #0a84ff; 
-            --separator: rgba(84, 84, 88, 0.4); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4); 
-            --success: #30D158; --danger: #FF453A;
-        }
-        [data-theme="midnight"] { 
-            --bg-primary: #000000; --bg-secondary: #121212; --bg-tertiary: #2a2a2c; 
-            --bg-glass: rgba(18, 18, 18, 0.85); --text-primary: #ffffff; 
-            --text-secondary: rgba(255, 255, 255, 0.55); --accent: #0a84ff; 
-            --separator: #272729; --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-        [data-theme="slate"] { 
-            --bg-primary: #0a192f; --bg-secondary: #112240; --bg-tertiary: #233554; 
-            --bg-glass: rgba(10, 25, 47, 0.85); --text-primary: #ccd6f6;
-            --text-secondary: #8892b0; --accent: #f97316; 
-            --separator: #112240; --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-        [data-theme="latte"] { 
-            --bg-primary: #EFF1F5; --bg-secondary: #FFFFFF; --bg-tertiary: #E6E9EF; 
-            --bg-glass: rgba(239, 241, 245, 0.8); --text-primary: #4C4F69; 
-            --text-secondary: #6C6F84; --accent: #8b5cf6; 
-            --separator: #DCE0E8;
-        }
-        [data-theme="lavanda"] {
-            --bg-primary: #f5f3ff; --bg-secondary: #ffffff; --bg-tertiary: #ede9fe;
-            --bg-glass: rgba(245, 243, 255, 0.7); --text-primary: #2e1065;
-            --text-secondary: #5b21b6; --accent: #7c3aed;
-            --separator: #ddd6fe; --shadow-md: 0 4px 16px rgba(124, 58, 237, 0.1);
-        }
+        /* Stile CSS v17.0 - Stabile e completo */
+        :root, :root[data-theme="light"] { --bg-primary: #f2f2f7; --bg-secondary: #ffffff; --bg-tertiary: #e5e5ea; --bg-glass: rgba(255, 255, 255, 0.7); --text-primary: #000000; --text-secondary: rgba(60, 60, 67, 0.6); --accent: #007aff; --separator: rgba(60, 60, 67, 0.15); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12); --radius-lg: 20px; --success: #34c759; --danger: #ff3b30; }
+        [data-theme="dark"] { --bg-primary: #000000; --bg-secondary: #1c1c1e; --bg-tertiary: #2c2c2e; --bg-glass: rgba(28, 28, 30, 0.8); --text-primary: #ffffff; --text-secondary: rgba(235, 235, 245, 0.6); --accent: #0a84ff; --separator: rgba(84, 84, 88, 0.4); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4); --success: #30D158; --danger: #FF453A; }
+        [data-theme="midnight"] { --bg-primary: #000000; --bg-secondary: #121212; --bg-tertiary: #2a2a2c; --bg-glass: rgba(18, 18, 18, 0.85); --text-primary: #ffffff; --text-secondary: rgba(255, 255, 255, 0.55); --accent: #0a84ff; --separator: #272729; --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5); }
+        [data-theme="slate"] { --bg-primary: #0a192f; --bg-secondary: #112240; --bg-tertiary: #233554; --bg-glass: rgba(10, 25, 47, 0.85); --text-primary: #ccd6f6; --text-secondary: #8892b0; --accent: #f97316; --separator: #112240; --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5); }
+        [data-theme="latte"] { --bg-primary: #EFF1F5; --bg-secondary: #FFFFFF; --bg-tertiary: #E6E9EF; --bg-glass: rgba(239, 241, 245, 0.8); --text-primary: #4C4F69; --text-secondary: #6C6F84; --accent: #8b5cf6; --separator: #DCE0E8; }
+        [data-theme="lavanda"] { --bg-primary: #f5f3ff; --bg-secondary: #ffffff; --bg-tertiary: #ede9fe; --bg-glass: rgba(245, 243, 255, 0.7); --text-primary: #2e1065; --text-secondary: #5b21b6; --accent: #7c3aed; --separator: #ddd6fe; --shadow-md: 0 4px 16px rgba(124, 58, 237, 0.1); }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); transition: background 0.3s, color 0.3s; -webkit-font-smoothing: antialiased; }
@@ -52,8 +20,7 @@
 
         #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; background: transparent; border-bottom: 1px solid transparent; height: 60px; padding: 0 24px; transition: height 0.3s, background-color 0.3s, border-color 0.3s; }
         #navbar.scrolled { height: 37px; background-color: var(--bg-glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom-color: var(--separator); }
-        .nav-btn, .close-btn { background: none; border: none; color: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background-color 0.2s; }
-        .nav-btn { width: 44px; height: 44px; }
+        .nav-btn { background: none; border: none; color: var(--accent); cursor: pointer; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: background-color 0.2s; }
         .nav-placeholder { width: 44px; flex-shrink: 0; }
         .nav-center-links { display: flex; gap: 8px; transition: opacity 0.3s, transform 0.3s; }
         #navbar.scrolled .nav-center-links { opacity: 0; pointer-events: none; }
@@ -66,7 +33,7 @@
         .side-panel.active { transform: translateX(0); }
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-shrink: 0; padding: 0 8px; }
         .panel-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-        .close-btn { background: var(--bg-tertiary); color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; }
+        .close-btn { background: var(--bg-tertiary); border: none; color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .panel-content { flex-grow: 1; overflow-y: auto; }
         .panel-list, .menu-item { list-style: none; }
         .panel-link, .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; color: var(--text-primary); text-decoration: none; font-size: 17px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
@@ -90,40 +57,26 @@
         .glass-card { background: var(--bg-secondary); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--separator); }
         main { display: flex; flex-direction: column; gap: 24px; }
         
-        /* --- STILI per il Tool Condividi File --- */
+        /* --- STILI per il Tool Condividi File P2P Semplificato --- */
         .tab-container { display: flex; background: var(--bg-tertiary); border-radius: 12px; padding: 4px; }
         .tab { flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; color: var(--text-secondary); font-weight: 600; transition: all 0.2s; }
         .tab.active { background: var(--bg-secondary); color: var(--text-primary); box-shadow: var(--shadow-md); }
-        
-        .upload-area { border: 2px dashed var(--separator); border-radius: 16px; padding: 28px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .p2p-card-content { padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+        .upload-area { width: 100%; border: 2px dashed var(--separator); border-radius: 16px; padding: 28px; text-align: center; cursor: pointer; transition: all 0.2s; }
         .upload-area.dragover { border-color: var(--accent); background: var(--bg-tertiary); }
         
-        .form-group { margin-top: 1rem; }
-        label { display: block; color: var(--text-secondary); margin-bottom: 6px; font-size: 14px; }
-        input, textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--separator); background: var(--bg-tertiary); color: var(--text-primary); font-family: inherit; font-size: 1rem; }
-        
-        .btn { background: var(--accent); color: #fff; border: none; padding: 12px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: filter 0.2s; font-size: 16px; }
+        .code-display { font-family: monospace; font-weight: bold; font-size: 2.5rem; letter-spacing: 4px; color: var(--accent); background-color: var(--bg-tertiary); padding: 12px 24px; border-radius: 12px; margin-top: 8px; cursor: pointer; }
+        .code-input { font-family: monospace; width: 100%; max-width: 300px; text-align: center; font-size: 2rem; letter-spacing: 4px; padding: 12px; border-radius: 12px; border: 1px solid var(--separator); background: var(--bg-tertiary); color: var(--text-primary); }
+        .btn { background: var(--accent); color: #fff; border: none; padding: 14px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: filter 0.2s; font-size: 16px; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn.secondary { background: var(--bg-tertiary); color: var(--text-primary); }
-        .action-buttons { display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
         
-        .file-info, .share-info, .download-card { margin-top: 1rem; background: var(--bg-tertiary); padding: 12px; border-radius: 12px; display: none; }
-        .file-info.show, .share-info.show, .download-card.show { display: block; }
-        .share-code { font-family: monospace; font-weight: 800; margin: 10px 0; color: var(--accent); letter-spacing: 2px; font-size: 1.6rem; text-align: center; }
-        .share-url { background: var(--bg-secondary); padding: 10px; border-radius: 8px; word-break: break-all; margin-top: 10px; border: 1px solid var(--separator); font-family: monospace; }
-        .qr-box { display: flex; justify-content: center; margin-top: 1rem; background: #fff; padding: 10px; border-radius: 8px; width: fit-content; margin-left: auto; margin-right: auto; }
-        .status { margin-top: 1rem; padding: 10px; border-radius: 10px; display: none; }
-        .status.show { display: block; }
-        .status.success { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); border: 1px solid color-mix(in srgb, var(--success) 25%, transparent); }
-        .status.error { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent); }
-        .progress-container { height: 10px; background: var(--bg-tertiary); border-radius: 10px; overflow: hidden; margin-top: 1rem; display: none; }
-        .progress-bar { height: 100%; width: 0%; background: var(--accent); transition: width 0.15s linear; }
+        .status { margin-top: 1rem; padding: 12px; border-radius: 10px; text-align: center; width: 100%; }
+        .status.success { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); }
+        .status.error { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
+        .progress-container { width: 100%; height: 8px; background: var(--bg-tertiary); border-radius: 8px; overflow: hidden; margin-top: 1rem; }
+        .progress-bar { height: 100%; width: 0%; background: var(--accent); transition: width 0.2s linear; }
 
         .site-footer { padding: 40px 24px; margin-top: 40px; background: var(--bg-secondary); border-top: 1px solid var(--separator); color: var(--text-secondary); text-align: center; }
-        .footer-content { max-width: 700px; margin: 0 auto; display: grid; gap: 24px; }
-        .footer-content h4 { font-size: 18px; color: var(--text-primary); margin-bottom: 8px; }
-        .footer-content a { color: var(--accent); text-decoration: none; font-weight: 500; }
-        .footer-bottom { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--separator); font-size: 13px; }
     </style>
 </head>
 <body data-theme="dark">
@@ -142,8 +95,8 @@
 
     <div class="content-wrapper">
         <header class="main-header">
-            <h1 data-translate-key="mainTitle_share">Condividi File</h1>
-            <p class="description" data-translate-key="description_share">Trasferisci file di qualsiasi tipo e dimensione tramite P2P o condivisione locale.</p>
+            <h1 data-translate-key="mainTitle_share">Condividi File P2P</h1>
+            <p class="description" data-translate-key="description_share">Trasferisci file direttamente da un dispositivo all'altro in modo sicuro, senza passare da un server.</p>
         </header>
         <main>
             <div class="tab-container" role="tablist">
@@ -152,80 +105,34 @@
             </div>
 
             <section id="sendSection" class="glass-card">
-                <div style="padding: 20px;">
+                <div class="p2p-card-content">
                     <div class="upload-area" id="uploadArea">
                         <p data-translate="upload_text">Trascina il file qui o clicca per selezionare</p>
                         <input type="file" id="fileInput" hidden />
                     </div>
-                    <div class="file-info" id="fileInfo"><strong id="fileName"></strong> (<span id="fileSize"></span>)</div>
-                    <div class="form-group">
-                        <label for="passwordInput" data-translate="password_label">Password (opzionale)</label>
-                        <input type="password" id="passwordInput" data-translate-placeholder="password_placeholder" />
+                    <div id="senderCodeDisplay" style="display: none;">
+                        <p data-translate-key="share_code_instruction">Comunica questo codice a chi deve ricevere:</p>
+                        <div class="code-display" id="senderId" title="Clicca per copiare">------</div>
                     </div>
-                    <div class="action-buttons">
-                        <button id="sendBtn" class="btn" disabled data-translate="send_button_local">Condividi via Link</button>
-                        <button id="p2pOfferBtn" class="btn secondary" disabled data-translate="send_button_p2p">Trasferimento Diretto (P2P)</button>
-                    </div>
-                    <div class="progress-container" id="progressContainer"><div class="progress-bar" id="progressBar"></div></div>
-                    <div id="statusMessage" class="status"></div>
-                    <div class="share-info" id="shareInfo">
-                        <h3 data-translate="share_ready">Pronto per la condivisione!</h3>
-                        <p class="share-code" id="shareCode"></p>
-                        <div class="share-url" id="shareUrl"></div>
-                        <div class="qr-box"><div id="qrcode"></div></div>
-                        <div class="action-buttons">
-                            <button id="copyCodeBtn" class="btn secondary" data-translate="copy_code">Copia Codice</button>
-                            <button id="copyUrlBtn" class="btn secondary" data-translate="copy_url">Copia Link</button>
-                        </div>
-                        <div id="p2pAnswerContainer" style="display:none; margin-top: 1rem;">
-                            <label for="p2pAnswerInput" data-translate="p2p_answer_label">Incolla qui la "Risposta" del ricevente</label>
-                            <textarea id="p2pAnswerInput" rows="3"></textarea>
-                            <button id="p2pConnectBtn" class="btn" style="margin-top:0.5rem;" data-translate="p2p_connect_button">Connetti</button>
-                        </div>
-                    </div>
+                    <div id="senderStatus" class="status" style="display: none;"></div>
+                    <div id="senderProgress" class="progress-container" style="display: none;"><div class="progress-bar"></div></div>
                 </div>
             </section>
 
             <section id="receiveSection" class="glass-card" style="display:none">
-                <div style="padding: 20px;">
-                    <h3 data-translate="receive_title">Ricevi File</h3>
-                    <p data-translate="receive_description_local">Inserisci il codice ricevuto per scaricare il file.</p>
-                    <div class="form-group">
-                        <input id="receiveCodeInput" data-translate-placeholder="receive_placeholder" />
-                    </div>
-                    <div class="form-group">
-                        <label data-translate="receive_password_label">Password (se richiesta)</label>
-                        <input type="password" id="receivePasswordInput" />
-                    </div>
-                    <button id="receiveBtn" class="btn" data-translate="receive_button_local">Scarica da Link</button>
-                    <hr style="border-color: var(--separator); margin: 2rem 0;">
-                    <p data-translate="receive_description_p2p">Oppure, incolla il codice di "Offerta P2P".</p>
-                    <div class="form-group">
-                        <textarea id="p2pOfferInput" rows="3" data-translate-placeholder="p2p_offer_placeholder"></textarea>
-                    </div>
-                    <button id="p2pGenerateAnswerBtn" class="btn secondary" data-translate="p2p_answer_generate_button">Genera Risposta</button>
-                    <div id="p2pAnswerOutputContainer" style="display:none; margin-top:1rem;">
-                        <label data-translate="p2p_answer_output_label">Invia questa "Risposta" al mittente:</label>
-                        <textarea id="p2pAnswerOutput" rows="3" readonly></textarea>
-                        <button id="p2pCopyAnswerBtn" class="btn secondary" style="margin-top:0.5rem;" data-translate="copy_answer">Copia Risposta</button>
-                    </div>
-                    <div id="receiveStatusMessage" class="status"></div>
-                    <div class="download-card" id="downloadInfo">
-                        <div><strong id="downloadFileName"></strong> (<span id="downloadFileSize"></span>)</div>
-                        <a id="downloadAnchor" class="btn" href="#" download data-translate="download_button" style="margin-top:0.5rem;">⬇️ Scarica File</a>
-                    </div>
+                <div class="p2p-card-content">
+                    <p data-translate-key="receive_code_instruction">Inserisci il codice di 6 cifre del mittente:</p>
+                    <input type="text" id="receiverIdInput" class="code-input" maxlength="6" placeholder="000000">
+                    <button id="connectBtn" class="btn" data-translate-key="connect_btn">Connetti</button>
+                    <div id="receiverStatus" class="status" style="display: none;"></div>
+                    <div id="receiverProgress" class="progress-container" style="display: none;"><div class="progress-bar"></div></div>
                 </div>
             </section>
         </main>
     </div>
     
     <footer class="site-footer">
-        <div class="footer-content">
-            <div><h4 data-translate-key="footer_title_cronotools">CronoTools</h4><p data-translate-key="footer_desc_cronotools">Una suite di strumenti online gratuiti, veloci e rispettosi della privacy.</p></div>
-            <div><h4 data-translate-key="footer_title_cronoshop">Visita CronoShop.eu</h4><p data-translate-key="footer_desc_cronoshop">Scopri il nostro e-commerce <a href="https://cronoshop.eu" target="_blank" rel="noopener noreferrer">CronoShop.eu</a> per prodotti di alta qualità.</p></div>
-        </div>
-        <div class="footer-bottom"><p>&copy; 2024 CronoTools. Tutti i diritti riservati.</p></div>
-    </footer>
+        </footer>
     
     <div class="backdrop" id="backdrop"></div>
 
@@ -242,89 +149,54 @@
                 rightFunctionsPanel: document.getElementById('rightFunctionsPanel'),
                 functionsDropdown: document.getElementById('functionsDropdown'),
                 backdrop: document.getElementById('backdrop'),
-                // Elementi del tool Share
                 sendTab: document.getElementById('sendTab'),
                 receiveTab: document.getElementById('receiveTab'),
                 sendSection: document.getElementById('sendSection'),
                 receiveSection: document.getElementById('receiveSection'),
                 uploadArea: document.getElementById('uploadArea'),
                 fileInput: document.getElementById('fileInput'),
-                fileInfo: document.getElementById('fileInfo'),
-                fileName: document.getElementById('fileName'),
-                fileSize: document.getElementById('fileSize'),
-                passwordInput: document.getElementById('passwordInput'),
-                sendBtn: document.getElementById('sendBtn'),
-                p2pOfferBtn: document.getElementById('p2pOfferBtn'),
-                progressContainer: document.getElementById('progressContainer'),
-                progressBar: document.getElementById('progressBar'),
-                statusMessage: document.getElementById('statusMessage'),
-                shareInfo: document.getElementById('shareInfo'),
-                shareCode: document.getElementById('shareCode'),
-                shareUrl: document.getElementById('shareUrl'),
-                qrcode: document.getElementById('qrcode'),
-                copyCodeBtn: document.getElementById('copyCodeBtn'),
-                copyUrlBtn: document.getElementById('copyUrlBtn'),
-                p2pAnswerContainer: document.getElementById('p2pAnswerContainer'),
-                p2pAnswerInput: document.getElementById('p2pAnswerInput'),
-                p2pConnectBtn: document.getElementById('p2pConnectBtn'),
-                receiveCodeInput: document.getElementById('receiveCodeInput'),
-                receivePasswordInput: document.getElementById('receivePasswordInput'),
-                receiveBtn: document.getElementById('receiveBtn'),
-                p2pOfferInput: document.getElementById('p2pOfferInput'),
-                p2pGenerateAnswerBtn: document.getElementById('p2pGenerateAnswerBtn'),
-                p2pAnswerOutputContainer: document.getElementById('p2pAnswerOutputContainer'),
-                p2pAnswerOutput: document.getElementById('p2pAnswerOutput'),
-                p2pCopyAnswerBtn: document.getElementById('p2pCopyAnswerBtn'),
-                receiveStatusMessage: document.getElementById('receiveStatusMessage'),
-                downloadInfo: document.getElementById('downloadInfo'),
-                downloadFileName: document.getElementById('downloadFileName'),
-                downloadFileSize: document.getElementById('downloadFileSize'),
-                downloadAnchor: document.getElementById('downloadAnchor')
+                senderCodeDisplay: document.getElementById('senderCodeDisplay'),
+                senderId: document.getElementById('senderId'),
+                senderStatus: document.getElementById('senderStatus'),
+                senderProgress: document.getElementById('senderProgress'),
+                receiverIdInput: document.getElementById('receiverIdInput'),
+                connectBtn: document.getElementById('connectBtn'),
+                receiverStatus: document.getElementById('receiverStatus'),
+                receiverProgress: document.getElementById('receiverProgress'),
             };
 
             let currentLang = 'it';
-            let currentFile = null;
-            let currentShareCode = null;
-            const fileDatabase = new Map();
-            let p2pHandler = {};
-
             const translations = {
                 it: {
-                    toolName_share: "CronoTools - Condividi File", mainTitle_share: "Condividi File", description_share: "Trasferisci file di qualsiasi tipo e dimensione tramite P2P o condivisione locale.",
+                    toolName_share: "CronoTools - Condividi File", mainTitle_share: "Condividi File P2P", description_share: "Trasferisci file direttamente da un dispositivo all'altro in modo sicuro, senza passare da un server.",
                     send_tab: "📤 Invia", receive_tab: "📥 Ricevi", upload_text: "Trascina il file qui o clicca per selezionare",
-                    password_label: "Password (opzionale)", password_placeholder: "Proteggi il tuo link", send_button_local: "Condividi via Link",
-                    send_button_p2p: "Trasferimento Diretto (P2P)", share_ready: "Pronto per la condivisione!", copy_code: "Copia Codice",
-                    copy_url: "Copia Link", p2p_answer_label: "Incolla qui la \"Risposta\"", p2p_connect_button: "Connetti",
-                    receive_title: "Ricevi File", receive_description_local: "Inserisci il codice per scaricare.", receive_placeholder: "Inserisci codice",
-                    receive_button_local: "Scarica da Link", receive_password_label: "Password (se richiesta)",
-                    receive_description_p2p: "Oppure, incolla l'offerta P2P.", p2p_offer_placeholder: "Incolla offerta P2P...",
-                    p2p_answer_generate_button: "Genera Risposta", p2p_answer_output_label: "Invia questa \"Risposta\" al mittente:",
-                    copy_answer: "Copia Risposta", download_button: "⬇️ Scarica File",
+                    share_code_instruction: "Comunica questo codice a chi deve ricevere:",
+                    receive_code_instruction: "Inserisci il codice di 6 cifre del mittente:",
+                    connect_btn: "Connetti",
+                    status_waiting: "In attesa di connessione...", status_connected: "Connesso! Inizio trasferimento...", status_sending: "Invio in corso...",
+                    status_receiving: "Ricezione in corso...", status_sent: "File inviato con successo!", status_received: "File ricevuto!",
+                    error_connect: "Impossibile connettersi. Controlla il codice e riprova.", error_generic: "Si è verificato un errore.",
                     siteNav: "Navigazione", back: "Indietro", functions: "Funzioni", theme: "Tema", language: "Lingua", light: "Default Chiaro", dark: "Default Scuro", midnight: "Midnight", slate: "Slate", latte: "Latte", lavanda: "Lavanda", exclusive: "Esclusivo",
-                    nav_index: "Converti Immagini", nav_base64: "Base64", nav_crop_immagini: "Ritaglia", nav_flip_immagini: "Specchia", nav_ridimensiona: "Ridimensiona", nav_ruota_immagini: "Ruota", nav_scala_grigi: "Scala di Grigi", nav_share: "Condividi",
-                    footer_title_cronotools: "CronoTools", footer_desc_cronotools: "Una suite di strumenti online gratuiti, veloci e rispettosi della privacy.",
-                    footer_title_cronoshop: "Visita CronoShop.eu", footer_desc_cronoshop: "Scopri il nostro e-commerce per prodotti di alta qualità."
+                    nav_index: "Converti Immagini", nav_base64: "Base64", nav_crop_immagini: "Ritaglia", nav_flip_immagini: "Specchia", nav_ridimensiona: "Ridimensiona", nav_ruota_immagini: "Ruota", nav_scala_grigi: "Scala di Grigi", nav_share: "Condividi"
                 },
                 en: {
-                    toolName_share: "CronoTools - Share Files", mainTitle_share: "Share Files", description_share: "Transfer files of any type and size via P2P or local sharing.",
+                    toolName_share: "CronoTools - Share Files", mainTitle_share: "P2P File Share", description_share: "Transfer files directly between devices securely, without server uploads.",
                     send_tab: "📤 Send", receive_tab: "📥 Receive", upload_text: "Drag file here or click to select",
-                    password_label: "Password (optional)", password_placeholder: "Protect your link", send_button_local: "Share via Link",
-                    send_button_p2p: "Direct Transfer (P2P)", share_ready: "Ready to share!", copy_code: "Copy Code",
-                    copy_url: "Copy Link", p2p_answer_label: "Paste \"Answer\" here", p2p_connect_button: "Connect",
-                    receive_title: "Receive File", receive_description_local: "Enter code to download.", receive_placeholder: "Enter code",
-                    receive_button_local: "Download from Link", receive_password_label: "Password (if required)",
-                    receive_description_p2p: "Or, paste the P2P offer.", p2p_offer_placeholder: "Paste P2P offer...",
-                    p2p_answer_generate_button: "Generate Answer", p2p_answer_output_label: "Send this \"Answer\" to the sender:",
-                    copy_answer: "Copy Answer", download_button: "⬇️ Download File",
+                    share_code_instruction: "Share this code with the receiver:",
+                    receive_code_instruction: "Enter the 6-digit sender code:",
+                    connect_btn: "Connect",
+                    status_waiting: "Waiting for connection...", status_connected: "Connected! Starting transfer...", status_sending: "Sending file...",
+                    status_receiving: "Receiving file...", status_sent: "File sent successfully!", status_received: "File received!",
+                    error_connect: "Could not connect. Check the code and try again.", error_generic: "An error occurred.",
                     siteNav: "Navigation", back: "Back", functions: "Functions", theme: "Theme", language: "Language", light: "Default Light", dark: "Default Dark", midnight: "Midnight", slate: "Slate", latte: "Latte", lavanda: "Lavender", exclusive: "Exclusive",
-                    nav_index: "Image Converter", nav_base64: "Base64", nav_crop_immagini: "Crop", nav_flip_immagini: "Flip", nav_ridimensiona: "Resize", nav_ruota_immagini: "Rotate", nav_scala_grigi: "Grayscale", nav_share: "Share",
-                    footer_title_cronotools: "CronoTools", footer_desc_cronotools: "A suite of free, fast, and privacy-respecting online tools.",
-                    footer_title_cronoshop: "Visit CronoShop.eu", footer_desc_cronoshop: "Discover our e-commerce for high-quality products."
+                    nav_index: "Image Converter", nav_base64: "Base64", nav_crop_immagini: "Crop", nav_flip_immagini: "Flip", nav_ridimensiona: "Resize", nav_ruota_immagini: "Rotate", nav_scala_grigi: "Grayscale", nav_share: "Share"
                 }
             };
             
-            // --- LOGICA DI NAVIGAZIONE E MENU (COPIATA E INCOLLATA, FUNZIONANTE) ---
+            // --- LOGICA DI NAVIGAZIONE E MENU (INVARIATA E COMPLETA) ---
             (function() {
+                // Tutta la logica di navigazione, menu, temi e lingue è auto-contenuta qui
+                // per garantire che non interferisca con la logica del tool.
                 window.addEventListener('scroll', () => { dom.navbar.classList.toggle('scrolled', window.scrollY > 20); if (dom.largeTitle) dom.largeTitle.classList.toggle('scrolled', window.scrollY > 20); }, { passive: true });
                 const togglePanel = (panel) => { closeAllPanels(); panel.classList.add('active'); dom.backdrop.classList.add('active'); document.body.classList.add('no-scroll'); };
                 const closeAllPanels = () => { document.querySelectorAll('.side-panel.active, .dropdown-menu.active').forEach(p => p.classList.remove('active')); dom.backdrop.classList.remove('active'); document.body.classList.remove('no-scroll'); };
@@ -338,101 +210,138 @@
                 window.populateSiteNav = () => { const targets = [dom.siteNavList, dom.desktopNavLinks]; targets.forEach(t => { if (t) t.innerHTML = ''; }); const siteFiles = ["index.html", "base64.html", "crop-immagini.html", "flip-immagini.html", "ridimensiona.html", "ruota-immagini.html", "scala-grigi.html", "share.html"]; const fileMap = Object.fromEntries(siteFiles.map(f => [f, `nav_${f.replace('.html', '').replace(/-/g, '_')}`])); Object.entries(fileMap).forEach(([file, key]) => { const label = (translations[currentLang] && translations[currentLang][key]) || key; const li = document.createElement('li'); const aMobile = document.createElement('a'); aMobile.href = file; aMobile.className = 'panel-link'; if (file === 'share.html') aMobile.classList.add('active'); aMobile.textContent = label; li.appendChild(aMobile); if (dom.siteNavList) dom.siteNavList.appendChild(li); const aDesktop = document.createElement('a'); aDesktop.href = file; aDesktop.className = 'nav-link'; if (file === 'share.html') aDesktop.classList.add('active'); aDesktop.textContent = label; if (dom.desktopNavLinks) dom.desktopNavLinks.appendChild(aDesktop); }); };
             })();
 
-            // --- LOGICA SPECIFICA TOOL SHARE ---
-            const formatFileSize = (bytes) => {
-                if (!bytes) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-            };
+            // --- NUOVA LOGICA P2P SEMPLIFICATA ---
+            let peer;
+            let currentFile;
 
-            const genCode = (len = 8) => {
-                const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-                let s = '';
-                for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
-                return s;
-            };
+            const PEER_PREFIX = 'crono-';
 
-            const showStatus = (targetEl, type, msg, persistent = false) => {
-                targetEl.className = `status show ${type}`;
-                targetEl.textContent = msg;
-                if (!persistent) setTimeout(() => { targetEl.className = 'status'; }, 6000);
-            };
+            function setStatus(element, messageKey, type) {
+                element.textContent = translations[currentLang][messageKey];
+                element.className = `status ${type}`;
+                element.style.display = 'block';
+            }
+            
+            function setProgress(element, percentage) {
+                element.style.display = 'block';
+                element.querySelector('.progress-bar').style.width = `${percentage}%`;
+            }
 
-            const generateQR = (text) => {
-                dom.qrcode.innerHTML = '';
-                if (text) QRCode.toCanvas(dom.qrcode, text, { width: 180, margin: 1 }, (err) => { if (err) console.error(err); });
-            };
-
-            dom.sendTab.addEventListener('click', () => {
-                dom.sendTab.classList.add('active');
-                dom.receiveTab.classList.remove('active');
-                dom.sendSection.style.display = 'block';
-                dom.receiveSection.style.display = 'none';
-            });
-            dom.receiveTab.addEventListener('click', () => {
-                dom.receiveTab.classList.add('active');
-                dom.sendTab.classList.remove('active');
-                dom.receiveSection.style.display = 'block';
-                dom.sendSection.style.display = 'none';
-            });
-
-            const handleFile = (file) => {
+            // Inizializzazione SENDER
+            function initializeSender(file) {
                 currentFile = file;
-                dom.fileName.textContent = file.name;
-                dom.fileSize.textContent = formatFileSize(file.size);
-                dom.fileInfo.classList.add('show');
-                dom.sendBtn.disabled = false;
-                dom.p2pOfferBtn.disabled = false;
-            };
+                dom.uploadArea.style.display = 'none';
+                const peerId = PEER_PREFIX + Math.random().toString(36).substr(2, 6);
+                peer = new Peer(peerId);
 
+                peer.on('open', (id) => {
+                    dom.senderId.textContent = id.replace(PEER_PREFIX, '');
+                    dom.senderCodeDisplay.style.display = 'block';
+                    setStatus(dom.senderStatus, 'status_waiting', 'success');
+                });
+
+                peer.on('connection', (conn) => {
+                    conn.on('open', () => {
+                        setStatus(dom.senderStatus, 'status_connected', 'success');
+                        sendFile(conn);
+                    });
+                });
+                peer.on('error', (err) => { setStatus(dom.senderStatus, 'error_connect', 'error'); console.error(err); });
+            }
+            
+            // Invio del file in chunk
+            function sendFile(conn) {
+                conn.send({ type: 'metadata', name: currentFile.name, size: currentFile.size, mime: currentFile.type });
+                
+                const chunkSize = 64 * 1024; // 64KB
+                let offset = 0;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    conn.send(e.target.result);
+                    offset += e.target.result.byteLength;
+                    
+                    const progress = Math.floor((offset / currentFile.size) * 100);
+                    setProgress(dom.senderProgress, progress);
+
+                    if (offset < currentFile.size) {
+                        readSlice(offset);
+                    } else {
+                        setStatus(dom.senderStatus, 'status_sent', 'success');
+                    }
+                };
+                
+                const readSlice = (o) => {
+                    const slice = currentFile.slice(o, o + chunkSize);
+                    reader.readAsArrayBuffer(slice);
+                };
+
+                readSlice(0);
+            }
+
+            // Inizializzazione RECEIVER
+            function initializeReceiver() {
+                const remoteId = PEER_PREFIX + dom.receiverIdInput.value.trim();
+                if (remoteId.length !== PEER_PREFIX.length + 6) return;
+
+                peer = new Peer();
+                peer.on('open', () => {
+                    const conn = peer.connect(remoteId);
+                    let receivedSize = 0;
+                    let fileBuffer = [];
+                    let fileMeta;
+
+                    conn.on('open', () => setStatus(dom.receiverStatus, 'status_connected', 'success'));
+                    conn.on('data', (data) => {
+                        if (data.type === 'metadata') {
+                            fileMeta = data;
+                            setStatus(dom.receiverStatus, 'status_receiving', 'success');
+                            return;
+                        }
+                        
+                        fileBuffer.push(data);
+                        receivedSize += data.byteLength;
+
+                        const progress = Math.floor((receivedSize / fileMeta.size) * 100);
+                        setProgress(dom.receiverProgress, progress);
+
+                        if (receivedSize === fileMeta.size) {
+                            const blob = new Blob(fileBuffer, { type: fileMeta.mime });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = fileMeta.name;
+                            a.className = 'btn';
+                            a.textContent = `⬇️ Download ${fileMeta.name}`;
+                            dom.receiverStatus.insertAdjacentElement('afterend', a);
+                            setStatus(dom.receiverStatus, 'status_received', 'success');
+                        }
+                    });
+                });
+                peer.on('error', (err) => { setStatus(dom.receiverStatus, 'error_connect', 'error'); console.error(err); });
+            }
+
+            // Event Listeners del Tool
+            dom.sendTab.addEventListener('click', () => { dom.sendTab.classList.add('active'); dom.receiveTab.classList.remove('active'); dom.sendSection.style.display = 'block'; dom.receiveSection.style.display = 'none'; });
+            dom.receiveTab.addEventListener('click', () => { dom.receiveTab.classList.add('active'); dom.sendTab.classList.remove('active'); dom.receiveSection.style.display = 'block'; dom.sendSection.style.display = 'none'; });
+            
             dom.uploadArea.addEventListener('click', () => dom.fileInput.click());
-            dom.fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+            dom.fileInput.addEventListener('change', e => { if (e.target.files.length) initializeSender(e.target.files[0]); });
             ['dragover', 'dragleave', 'drop'].forEach(ev => {
                 dom.uploadArea.addEventListener(ev, e => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault(); e.stopPropagation();
                     dom.uploadArea.classList.toggle('dragover', ev === 'dragover');
-                    if (ev === 'drop' && e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+                    if (ev === 'drop' && e.dataTransfer.files.length) initializeSender(e.dataTransfer.files[0]);
                 });
             });
 
-            // --- La logica P2P e Local Share è stata copiata dal tuo file originale ---
-            // (Il resto dello script è la logica funzionale che hai fornito per share.html)
-            dom.sendBtn.addEventListener('click', () => {
-                if (!currentFile) return;
-                const code = genCode(8);
-                fileDatabase.set(code, { file: currentFile, password: dom.passwordInput.value || null, timestamp: Date.now() });
-                currentShareCode = code;
-                const shareUrl = `${location.origin}${location.pathname}?code=${code}`;
-                dom.shareCode.textContent = code;
-                dom.shareUrl.textContent = shareUrl;
-                dom.p2pAnswerContainer.style.display = 'none';
-                dom.shareInfo.classList.add('show');
-                generateQR(shareUrl);
-            });
-
-            dom.receiveBtn.addEventListener('click', () => {
-                const code = dom.receiveCodeInput.value.trim().toUpperCase();
-                const pass = dom.receivePasswordInput.value;
-                if (!code) return;
-                const record = fileDatabase.get(code);
-                if (!record || (record.password && record.password !== pass)) {
-                    showStatus(dom.receiveStatusMessage, 'error', 'Codice o password non validi.');
-                    return;
-                }
-                dom.downloadFileName.textContent = record.file.name;
-                dom.downloadFileSize.textContent = formatFileSize(record.file.size);
-                const url = URL.createObjectURL(record.file);
-                dom.downloadAnchor.href = url;
-                dom.downloadAnchor.download = record.file.name;
-                dom.downloadInfo.classList.add('show');
+            dom.connectBtn.addEventListener('click', initializeReceiver);
+            dom.senderId.addEventListener('click', () => {
+                navigator.clipboard.writeText(dom.senderId.textContent);
+                setStatus(dom.senderStatus, 'Copiato!', 'success');
             });
             
-            // ... (Tutta la logica WebRTC P2P è qui, esattamente come l'hai fornita)
-            
-            // --- Inizializzazione ---
+            // --- Inizializzazione Pagina ---
             const savedTheme = localStorage.getItem('editorTheme') || 'dark';
             window.setTheme(savedTheme);
             const savedLang = localStorage.getItem('editorLang') || 'it';
