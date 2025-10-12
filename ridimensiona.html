@@ -87,7 +87,6 @@
         .glass-card { background: var(--bg-secondary); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--separator); }
         main { display: flex; flex-direction: column; gap: 24px; }
         
-        /* --- NUOVI STILI per il Tool Ridimensiona --- */
         .upload-placeholder { padding: 48px 24px; text-align: center; cursor: pointer; border: 2px dashed var(--separator); border-radius: var(--radius-lg); transition: all 0.3s; }
         .upload-placeholder:hover { border-color: var(--accent); }
         .upload-icon { width: 48px; height: 48px; color: var(--text-secondary); margin-bottom: 16px; }
@@ -109,7 +108,6 @@
         .results-container img { max-width: 100%; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--separator); }
         .results-container a { display: inline-block; padding: 12px 24px; background: var(--accent); color: white; text-decoration: none; font-weight: 600; border-radius: 12px; }
 
-        /* --- Footer --- */
         .site-footer { padding: 40px 24px; margin-top: 40px; background: var(--bg-secondary); border-top: 1px solid var(--separator); color: var(--text-secondary); text-align: center; }
         .footer-content { max-width: 700px; margin: 0 auto; display: grid; gap: 24px; }
         .footer-content h4 { font-size: 18px; color: var(--text-primary); margin-bottom: 8px; }
@@ -221,7 +219,7 @@
                     uploadAction: "Clicca o trascina un'immagine", width: "Larghezza (px)", height: "Altezza (px)", resizeBtn: "Ridimensiona e Scarica", resetBtn: "Carica un'altra immagine",
                     siteNav: "Navigazione", back: "Indietro", functions: "Funzioni", theme: "Tema", language: "Lingua",
                     light: "Default Chiaro", dark: "Default Scuro", midnight: "Midnight", slate: "Slate", latte: "Latte", lavanda: "Lavanda", exclusive: "Esclusivo",
-                    nav_index: "Converti Immagini", nav_base64: "Base64", nav_crop_immagini: "Ritaglia", nav_flip_immagini: "Specchia", nav_ridimensiona: "Ridimensiona", nav_ruota_immagini: "Ruota", nav_scala_grigi: "Scala di Grigi", nav_share: "Condividi",
+                    nav_index: "Converti Immagini", nav_base64: "Base64", nav_crop_immagini: "Ritaglia", nav_flip_immagini: "Specchia", nav_ridimensiona: "Ridimensiona", nav_ruota_immagini: "Ruota", nav_scala_grigi: "Scala di Grigi", nav_share: "Condividi", nav_qr: "Generatore QR Code",
                     footer_title_cronotools: "CronoTools", footer_desc_cronotools: "Una suite di strumenti online gratuiti, veloci, affidabili e rispettosi della privacy. Tutte le operazioni avvengono localmente nel tuo browser.",
                     footer_title_cronoshop: "Visita CronoShop.eu", footer_desc_cronoshop: "Scopri il nostro e-commerce per una vasta gamma di prodotti di alta qualità. Supporta il nostro lavoro e trova fantastiche offerte."
                 },
@@ -230,7 +228,7 @@
                     uploadAction: "Click or drag an image", width: "Width (px)", height: "Height (px)", resizeBtn: "Resize and Download", resetBtn: "Upload Another Image",
                     siteNav: "Navigation", back: "Back", functions: "Functions", theme: "Theme", language: "Language",
                     light: "Default Light", dark: "Default Dark", midnight: "Midnight", slate: "Slate", latte: "Latte", lavanda: "Lavender", exclusive: "Exclusive",
-                    nav_index: "Image Converter", nav_base64: "Base64", nav_crop_immagini: "Crop", nav_flip_immagini: "Flip", nav_ridimensiona: "Resize", nav_ruota_immagini: "Rotate", nav_scala_grigi: "Grayscale", nav_share: "Share",
+                    nav_index: "Image Converter", nav_base64: "Base64", nav_crop_immagini: "Crop", nav_flip_immagini: "Flip", nav_ridimensiona: "Resize", nav_ruota_immagini: "Rotate", nav_scala_grigi: "Grayscale", nav_share: "Share", nav_qr: "QR Code Generator",
                     footer_title_cronotools: "CronoTools", footer_desc_cronotools: "A suite of free, fast, reliable, and privacy-respecting online tools. All operations are performed locally in your browser.",
                     footer_title_cronoshop: "Visit CronoShop.eu", footer_desc_cronoshop: "Discover our e-commerce for a wide range of high-quality products. Support our work and find great deals."
                 }
@@ -248,7 +246,30 @@
                 functionsMenuManager.init();
                 window.setTheme = (theme) => { document.body.setAttribute('data-theme', theme); localStorage.setItem('editorTheme', theme); };
                 window.setLanguage = (lang) => { currentLang = lang; localStorage.setItem('editorLang', lang); document.querySelectorAll('[data-translate-key]').forEach(el => { const key = el.dataset.translateKey; if (translations[lang] && translations[lang][key]) { el.textContent = translations[lang][key]; } }); populateSiteNav(); if (functionsMenuManager.container && functionsMenuManager.container.classList.contains('active')) { functionsMenuManager.history = []; functionsMenuManager.render(functionsMenuManager.getMainMenuItems(), translations[currentLang].functions); } };
-                window.populateSiteNav = () => { const targets = [dom.siteNavList, dom.desktopNavLinks]; targets.forEach(t => { if (t) t.innerHTML = ''; }); const siteFiles = ["index.html", "base64.html", "crop-immagini.html", "flip-immagini.html", "ridimensiona.html", "ruota-immagini.html", "scala-grigi.html", "share.html"]; const fileMap = Object.fromEntries(siteFiles.map(f => [f, `nav_${f.replace('.html', '').replace(/-/g, '_')}`])); Object.entries(fileMap).forEach(([file, key]) => { const label = (translations[currentLang] && translations[currentLang][key]) || key; const li = document.createElement('li'); const aMobile = document.createElement('a'); aMobile.href = file; aMobile.className = 'panel-link'; if (file === 'ridimensiona.html') aMobile.classList.add('active'); aMobile.textContent = label; li.appendChild(aMobile); if (dom.siteNavList) dom.siteNavList.appendChild(li); const aDesktop = document.createElement('a'); aDesktop.href = file; aDesktop.className = 'nav-link'; if (file === 'ridimensiona.html') aDesktop.classList.add('active'); aDesktop.textContent = label; if (dom.desktopNavLinks) dom.desktopNavLinks.appendChild(aDesktop); }); };
+                window.populateSiteNav = () => { 
+                    const targets = [dom.siteNavList, dom.desktopNavLinks]; 
+                    targets.forEach(t => { if (t) t.innerHTML = ''; });
+                    // **MODIFICA 1: Aggiungi qr.html qui**
+                    const siteFiles = ["index.html", "base64.html", "crop-immagini.html", "flip-immagini.html", "ridimensiona.html", "ruota-immagini.html", "scala-grigi.html", "share.html", "qr.html"]; 
+                    const fileMap = Object.fromEntries(siteFiles.map(f => [f, `nav_${f.replace('.html', '').replace(/-/g, '_')}`])); 
+                    Object.entries(fileMap).forEach(([file, key]) => { 
+                        const label = (translations[currentLang] && translations[currentLang][key]) || key;
+                        const li = document.createElement('li'); 
+                        const aMobile = document.createElement('a'); 
+                        aMobile.href = file; 
+                        aMobile.className = 'panel-link'; 
+                        if (file === 'ridimensiona.html') aMobile.classList.add('active'); 
+                        aMobile.textContent = label; 
+                        li.appendChild(aMobile); 
+                        if (dom.siteNavList) dom.siteNavList.appendChild(li); 
+                        const aDesktop = document.createElement('a'); 
+                        aDesktop.href = file; 
+                        aDesktop.className = 'nav-link'; 
+                        if (file === 'ridimensiona.html') aDesktop.classList.add('active'); 
+                        aDesktop.textContent = label; 
+                        if (dom.desktopNavLinks) dom.desktopNavLinks.appendChild(aDesktop); 
+                    }); 
+                };
             })();
 
             // --- NUOVA LOGICA per il Tool Ridimensiona ---
@@ -292,7 +313,6 @@
             function drawImage() {
                 if (!originalImage) return;
                 const canvas = dom.imageCanvas;
-                // Disegna un'anteprima scalata per non bloccare il browser
                 const previewWidth = Math.min(originalImage.width, dom.workspace.clientWidth - 32);
                 canvas.width = previewWidth;
                 canvas.height = previewWidth / (originalImage.width / originalImage.height);
@@ -322,7 +342,7 @@
                 dom.aspectLockBtn.classList.toggle('locked', isAspectRatioLocked);
                 dom.lockIcon.style.display = isAspectRatioLocked ? 'block' : 'none';
                 dom.unlockIcon.style.display = isAspectRatioLocked ? 'none' : 'block';
-                if(isAspectRatioLocked) { // Ricalcola al blocco
+                if(isAspectRatioLocked) {
                     const newWidth = parseInt(dom.widthInput.value, 10);
                     if (!isNaN(newWidth) && newWidth > 0) {
                         dom.heightInput.value = Math.round(newWidth / aspectRatio);
