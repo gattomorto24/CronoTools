@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ruota Immagini - CronoTools</title>
+    <title>Ridimensiona Immagini - CronoTools</title>
     <style>
-        /* Stile CSS v16.0 - Stabile e completo */
+        /* Stile CSS v16.0 - Finale e Completo */
         :root, :root[data-theme="light"] { 
             --bg-primary: #f2f2f7; --bg-secondary: #ffffff; --bg-tertiary: #e5e5ea; 
             --bg-glass: rgba(255, 255, 255, 0.7); --text-primary: #000000; 
@@ -87,22 +87,27 @@
         .glass-card { background: var(--bg-secondary); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--separator); }
         main { display: flex; flex-direction: column; gap: 24px; }
         
-        /* --- NUOVI STILI per il Tool Ruota --- */
         .upload-placeholder { padding: 48px 24px; text-align: center; cursor: pointer; border: 2px dashed var(--separator); border-radius: var(--radius-lg); transition: all 0.3s; }
         .upload-placeholder:hover { border-color: var(--accent); }
         .upload-icon { width: 48px; height: 48px; color: var(--text-secondary); margin-bottom: 16px; }
         .upload-text { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+        
         .workspace { display: none; flex-direction: column; gap: 16px; }
         .canvas-container { width: 100%; background-color: var(--bg-primary); border-radius: var(--radius-lg); padding: 16px; text-align: center; }
-        #imageCanvas { max-width: 100%; border-radius: 12px; transition: transform 0.3s ease-out; }
-        .controls-group { padding: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-        .control-btn { flex: 1; min-width: 120px; padding: 16px; border: none; background: var(--bg-tertiary); color: var(--text-primary); font-size: 17px; font-weight: 600; cursor: pointer; border-radius: 12px; transition: transform 0.2s, background-color 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .control-btn:hover { background-color: var(--accent); color: white; }
-        .control-btn:active { transform: scale(0.95); }
-        .control-btn.primary { background: var(--accent); color: white; }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #imageCanvas { max-width: 100%; border-radius: 12px; }
+        .controls-grid { padding: 16px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: flex-end; }
+        .input-group { display: flex; flex-direction: column; gap: 4px; }
+        .input-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+        .input-group input[type="number"] { width: 100%; padding: 12px; border: 1px solid var(--separator); background: var(--bg-tertiary); color: var(--text-primary); border-radius: 8px; font-size: 16px; font-family: inherit; }
+        .lock-aspect-ratio { background: var(--bg-tertiary); border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; height: 45px; width: 45px; border-radius: 8px; }
+        .lock-aspect-ratio.locked { color: var(--accent); }
+        .action-btn { padding: 16px; border: none; background: var(--accent); color: white; font-size: 17px; font-weight: 600; cursor: pointer; border-radius: 12px; transition: transform 0.2s; }
+        .action-btn.secondary { background: var(--bg-tertiary); color: var(--text-primary); }
 
-        /* --- Footer --- */
+        .results-container { text-align: center; }
+        .results-container img { max-width: 100%; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--separator); }
+        .results-container a { display: inline-block; padding: 12px 24px; background: var(--accent); color: white; text-decoration: none; font-weight: 600; border-radius: 12px; }
+
         .site-footer { padding: 40px 24px; margin-top: 40px; background: var(--bg-secondary); border-top: 1px solid var(--separator); color: var(--text-secondary); text-align: center; }
         .footer-content { max-width: 700px; margin: 0 auto; display: grid; gap: 24px; }
         .footer-content h4 { font-size: 18px; color: var(--text-primary); margin-bottom: 8px; }
@@ -124,14 +129,14 @@
         <button class="nav-btn mobile-only" id="leftMenuBtn"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg></button>
         <div class="nav-placeholder desktop-only"></div>
         <div class="nav-center-links desktop-only" id="desktopNavLinks"></div>
-        <div class="nav-title" data-translate-key="toolName_rotate">CronoTools - Ruota Immagini</div>
+        <div class="nav-title" data-translate-key="toolName_resize">CronoTools - Ridimensiona</div>
         <button class="nav-btn" id="rightMenuBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg></button>
     </nav>
 
     <div class="content-wrapper">
         <header class="main-header">
-            <h1 data-translate-key="mainTitle_rotate">Ruota Immagini</h1>
-            <p class="description" data-translate-key="description_rotate">Carica un'immagine e ruotala di 90° o 180° con un solo click. Perfetto per correggere l'orientamento delle tue foto.</p>
+            <h1 data-translate-key="mainTitle_resize">Ridimensiona Immagini</h1>
+            <p class="description" data-translate-key="description_resize">Cambia le dimensioni delle tue immagini in pixel. Mantieni o sblocca le proporzioni per un controllo totale.</p>
         </header>
         <main>
             <div class="glass-card" id="uploadCard">
@@ -145,24 +150,35 @@
             <div class="workspace" id="workspace">
                 <div class="canvas-container"><canvas id="imageCanvas"></canvas></div>
                 <div class="glass-card">
-                    <div class="controls-group">
-                        <button class="control-btn" id="rotateLeftBtn" data-translate-key="rotateLeft">-90°</button>
-                        <button class="control-btn" id="rotateRightBtn" data-translate-key="rotateRight">+90°</button>
-                        <button class="control-btn" id="rotate180Btn" data-translate-key="rotate180">180°</button>
+                    <div class="controls-grid">
+                        <div class="input-group">
+                            <label for="widthInput" data-translate-key="width">Larghezza (px)</label>
+                            <input type="number" id="widthInput" min="1">
+                        </div>
+                        <div class="input-group">
+                            <label for="heightInput" data-translate-key="height">Altezza (px)</label>
+                            <input type="number" id="heightInput" min="1">
+                        </div>
+                        <button class="lock-aspect-ratio locked" id="aspectLockBtn" title="Mantieni proporzioni">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="lockIcon"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="unlockIcon" style="display: none;"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12" transform="rotate(25 12 12)"/></svg>
+                        </button>
                     </div>
                      <div style="padding: 0 16px 16px;">
-                        <button class="control-btn primary" id="downloadBtn" data-translate-key="download">Salva e Scarica</button>
+                        <button class="action-btn" id="resizeBtn" data-translate-key="resizeBtn">Ridimensiona e Scarica</button>
                     </div>
                 </div>
-                 <button class="control-btn" id="resetBtn" data-translate-key="resetBtn">Carica un'altra immagine</button>
+                 <button class="action-btn secondary" id="resetBtn" data-translate-key="resetBtn">Carica un'altra immagine</button>
             </div>
+            
+            <div id="resultsContainer"></div>
         </main>
     </div>
     
     <footer class="site-footer">
         <div class="footer-content">
-            <div><h4 data-translate-key="footer_title_cronotools">CronoTools</h4><p data-translate-key="footer_desc_cronotools">Una suite di strumenti online gratuiti, veloci, affidabili e rispettosi della privacy. Tutte le operazioni avvengono localmente nel tuo browser.</p></div>
-            <div><h4 data-translate-key="footer_title_cronoshop">Visita CronoShop.eu</h4><p data-translate-key="footer_desc_cronoshop">Scopri il nostro e-commerce <a href="https://cronoshop.eu" target="_blank" rel="noopener noreferrer">CronoShop.eu</a> per una vasta gamma di prodotti di alta qualità.</p></div>
+            <div><h4 data-translate-key="footer_title_cronotools">CronoTools</h4><p data-translate-key="footer_desc_cronotools">CronoTools è una suite di strumenti online gratuiti progettati per essere veloci, affidabili e rispettosi della tua privacy. Tutte le operazioni vengono eseguite localmente nel tuo browser, garantendo che i tuoi dati non lascino mai il tuo dispositivo.</p></div>
+            <div><h4 data-translate-key="footer_title_cronoshop">Visita CronoShop.eu</h4><p data-translate-key="footer_desc_cronoshop">Scopri il nostro e-commerce <a href="https://cronoshop.eu" target="_blank" rel="noopener noreferrer">CronoShop.eu</a> per una vasta gamma di prodotti di alta qualità. Supporta il nostro lavoro e trova fantastiche offerte.</p></div>
         </div>
         <div class="footer-bottom"><p>&copy; 2024 CronoTools. Tutti i diritti riservati.</p></div>
     </footer>
@@ -182,36 +198,43 @@
                 rightFunctionsPanel: document.getElementById('rightFunctionsPanel'),
                 functionsDropdown: document.getElementById('functionsDropdown'),
                 backdrop: document.getElementById('backdrop'),
-                // Elementi del tool Ruota
                 uploadCard: document.getElementById('uploadCard'),
                 uploadPlaceholder: document.getElementById('uploadPlaceholder'),
                 fileInput: document.getElementById('fileInput'),
                 workspace: document.getElementById('workspace'),
                 imageCanvas: document.getElementById('imageCanvas'),
-                rotateLeftBtn: document.getElementById('rotateLeftBtn'),
-                rotateRightBtn: document.getElementById('rotateRightBtn'),
-                rotate180Btn: document.getElementById('rotate180Btn'),
-                downloadBtn: document.getElementById('downloadBtn'),
+                widthInput: document.getElementById('widthInput'),
+                heightInput: document.getElementById('heightInput'),
+                aspectLockBtn: document.getElementById('aspectLockBtn'),
+                lockIcon: document.getElementById('lockIcon'),
+                unlockIcon: document.getElementById('unlockIcon'),
+                resizeBtn: document.getElementById('resizeBtn'),
                 resetBtn: document.getElementById('resetBtn'),
             };
 
             let currentLang = 'it';
             const translations = {
                 it: {
-                    toolName_rotate: "CronoTools - Ruota Immagini", mainTitle_rotate: "Ruota Immagini", description_rotate: "Carica un'immagine e ruotala di 90° o 180° con un solo click. Perfetto per correggere l'orientamento delle tue foto.",
-                    uploadAction: "Clicca o trascina un'immagine", rotateLeft: "-90°", rotateRight: "+90°", rotate180: "180°", download: "Salva e Scarica", resetBtn: "Carica un'altra immagine",
-                    siteNav: "Navigazione", back: "Indietro", functions: "Funzioni", theme: "Tema", language: "Lingua", light: "Default Chiaro", dark: "Default Scuro", midnight: "Midnight", slate: "Slate", latte: "Latte", lavanda: "Lavanda", exclusive: "Esclusivo",
-                    nav_index: "Converti Immagini", nav_base64: "Base64", nav_crop_immagini: "Ritaglia", nav_flip_immagini: "Specchia", nav_ridimensiona: "Ridimensiona", nav_ruota_immagini: "Ruota", nav_scala_grigi: "Scala di Grigi", nav_share: "Condividi",
+                    toolName_resize: "CronoTools - Ridimensiona", mainTitle_resize: "Ridimensiona Immagini", description_resize: "Cambia le dimensioni delle tue immagini in pixel. Mantieni o sblocca le proporzioni per un controllo totale.",
+                    uploadAction: "Clicca o trascina un'immagine", width: "Larghezza (px)", height: "Altezza (px)", resizeBtn: "Ridimensiona e Scarica", resetBtn: "Carica un'altra immagine",
+                    siteNav: "Navigazione", back: "Indietro", functions: "Funzioni", theme: "Tema", language: "Lingua",
+                    light: "Default Chiaro", dark: "Default Scuro", midnight: "Midnight", slate: "Slate", latte: "Latte", lavanda: "Lavanda", exclusive: "Esclusivo",
+                    nav_index: "Converti Immagini", nav_base64: "Base64", nav_crop_immagini: "Ritaglia", nav_flip_immagini: "Specchia", nav_ridimensiona: "Ridimensiona", nav_ruota_immagini: "Ruota", nav_scala_grigi: "Scala di Grigi", nav_share: "Condividi", 
+                    // *** MODIFICA 2: Aggiungi traduzione per 'qr.html' ***
+                    nav_qr: "Generatore QR Code",
                     footer_title_cronotools: "CronoTools", footer_desc_cronotools: "Una suite di strumenti online gratuiti, veloci, affidabili e rispettosi della privacy. Tutte le operazioni avvengono localmente nel tuo browser.",
-                    footer_title_cronoshop: "Visita CronoShop.eu", footer_desc_cronoshop: "Scopri il nostro e-commerce per una vasta gamma di prodotti di alta qualità."
+                    footer_title_cronoshop: "Visita CronoShop.eu", footer_desc_cronoshop: "Scopri il nostro e-commerce per una vasta gamma di prodotti di alta qualità. Supporta il nostro lavoro e trova fantastiche offerte."
                 },
                 en: {
-                    toolName_rotate: "CronoTools - Rotate Images", mainTitle_rotate: "Rotate Images", description_rotate: "Upload an image and rotate it by 90° or 180° with a single click. Perfect for correcting photo orientation.",
-                    uploadAction: "Click or drag an image", rotateLeft: "-90°", rotateRight: "+90°", rotate180: "180°", download: "Save and Download", resetBtn: "Upload Another Image",
-                    siteNav: "Navigation", back: "Back", functions: "Functions", theme: "Theme", language: "Language", light: "Default Light", dark: "Default Dark", midnight: "Midnight", slate: "Slate", latte: "Latte", lavanda: "Lavender", exclusive: "Exclusive",
-                    nav_index: "Image Converter", nav_base64: "Base64", nav_crop_immagini: "Crop", nav_flip_immagini: "Flip", nav_ridimensiona: "Resize", nav_ruota_immagini: "Rotate", nav_scala_grigi: "Grayscale", nav_share: "Share",
+                    toolName_resize: "CronoTools - Resize Images", mainTitle_resize: "Resize Images", description_resize: "Change your image dimensions in pixels. Lock or unlock the aspect ratio for total control.",
+                    uploadAction: "Click or drag an image", width: "Width (px)", height: "Height (px)", resizeBtn: "Resize and Download", resetBtn: "Upload Another Image",
+                    siteNav: "Navigation", back: "Back", functions: "Functions", theme: "Theme", language: "Language",
+                    light: "Default Light", dark: "Default Dark", midnight: "Midnight", slate: "Slate", latte: "Latte", lavanda: "Lavender", exclusive: "Exclusive",
+                    nav_index: "Image Converter", nav_base64: "Base64", nav_crop_immagini: "Crop", nav_flip_immagini: "Flip", nav_ridimensiona: "Resize", nav_ruota_immagini: "Rotate", nav_scala_grigi: "Grayscale", nav_share: "Share", 
+                    // *** MODIFICA 2: Aggiungi traduzione per 'qr.html' ***
+                    nav_qr: "QR Code Generator",
                     footer_title_cronotools: "CronoTools", footer_desc_cronotools: "A suite of free, fast, reliable, and privacy-respecting online tools. All operations are performed locally in your browser.",
-                    footer_title_cronoshop: "Visit CronoShop.eu", footer_desc_cronoshop: "Discover our e-commerce for a wide range of high-quality products."
+                    footer_title_cronoshop: "Visit CronoShop.eu", footer_desc_cronoshop: "Discover our e-commerce for a wide range of high-quality products. Support our work and find great deals."
                 }
             };
             
@@ -227,15 +250,38 @@
                 functionsMenuManager.init();
                 window.setTheme = (theme) => { document.body.setAttribute('data-theme', theme); localStorage.setItem('editorTheme', theme); };
                 window.setLanguage = (lang) => { currentLang = lang; localStorage.setItem('editorLang', lang); document.querySelectorAll('[data-translate-key]').forEach(el => { const key = el.dataset.translateKey; if (translations[lang] && translations[lang][key]) { el.textContent = translations[lang][key]; } }); populateSiteNav(); if (functionsMenuManager.container && functionsMenuManager.container.classList.contains('active')) { functionsMenuManager.history = []; functionsMenuManager.render(functionsMenuManager.getMainMenuItems(), translations[currentLang].functions); } };
-                window.populateSiteNav = () => { const targets = [dom.siteNavList, dom.desktopNavLinks]; targets.forEach(t => { if (t) t.innerHTML = ''; }); const siteFiles = ["index.html", "base64.html", "crop-immagini.html", "flip-immagini.html", "ridimensiona.html", "ruota-immagini.html", "scala-grigi.html", "share.html"]; const fileMap = Object.fromEntries(siteFiles.map(f => [f, `nav_${f.replace('.html', '').replace(/-/g, '_')}`])); Object.entries(fileMap).forEach(([file, key]) => { const label = (translations[currentLang] && translations[currentLang][key]) || key; const li = document.createElement('li'); const aMobile = document.createElement('a'); aMobile.href = file; aMobile.className = 'panel-link'; if (file === 'ruota-immagini.html') aMobile.classList.add('active'); aMobile.textContent = label; li.appendChild(aMobile); if (dom.siteNavList) dom.siteNavList.appendChild(li); const aDesktop = document.createElement('a'); aDesktop.href = file; aDesktop.className = 'nav-link'; if (file === 'ruota-immagini.html') aDesktop.classList.add('active'); aDesktop.textContent = label; if (dom.desktopNavLinks) dom.desktopNavLinks.appendChild(aDesktop); }); };
+                window.populateSiteNav = () => { 
+                    const targets = [dom.siteNavList, dom.desktopNavLinks]; 
+                    targets.forEach(t => { if (t) t.innerHTML = ''; });
+                    // *** MODIFICA 1: Aggiungi qr.html all'array ***
+                    const siteFiles = ["index.html", "base64.html", "crop-immagini.html", "flip-immagini.html", "ridimensiona.html", "ruota-immagini.html", "scala-grigi.html", "share.html", "qr.html"]; 
+                    const fileMap = Object.fromEntries(siteFiles.map(f => [f, `nav_${f.replace('.html', '').replace(/-/g, '_')}`])); 
+                    Object.entries(fileMap).forEach(([file, key]) => { 
+                        const label = (translations[currentLang] && translations[currentLang][key]) || key;
+                        const li = document.createElement('li'); 
+                        const aMobile = document.createElement('a'); 
+                        aMobile.href = file; 
+                        aMobile.className = 'panel-link'; 
+                        if (file === 'ridimensiona.html') aMobile.classList.add('active'); 
+                        aMobile.textContent = label; 
+                        li.appendChild(aMobile); 
+                        if (dom.siteNavList) dom.siteNavList.appendChild(li); 
+                        const aDesktop = document.createElement('a'); 
+                        aDesktop.href = file; 
+                        aDesktop.className = 'nav-link'; 
+                        if (file === 'ridimensiona.html') aDesktop.classList.add('active'); 
+                        aDesktop.textContent = label; 
+                        if (dom.desktopNavLinks) dom.desktopNavLinks.appendChild(aDesktop); 
+                    }); 
+                };
             })();
 
-            // --- NUOVA LOGICA per il Tool Ruota ---
-            
+            // --- NUOVA LOGICA per il Tool Ridimensiona ---
             const ctx = dom.imageCanvas.getContext('2d');
             let originalImage = null;
             let originalFileName = '';
-            let currentRotation = 0; // in gradi
+            let aspectRatio = 1;
+            let isAspectRatioLocked = true;
 
             function handleImageUpload(file) {
                 if (!file || !file.type.startsWith('image/')) return;
@@ -245,9 +291,11 @@
                     originalImage = new Image();
                     originalImage.onload = () => {
                         originalFileName = file.name;
-                        currentRotation = 0;
+                        aspectRatio = originalImage.width / originalImage.height;
                         showWorkspace();
                         drawImage();
+                        dom.widthInput.value = originalImage.width;
+                        dom.heightInput.value = originalImage.height;
                     };
                     originalImage.src = e.target.result;
                 };
@@ -264,62 +312,80 @@
                 dom.workspace.style.display = 'none';
                 dom.fileInput.value = '';
                 originalImage = null;
-                currentRotation = 0;
             }
 
             function drawImage() {
                 if (!originalImage) return;
-
                 const canvas = dom.imageCanvas;
-                const angle = currentRotation * Math.PI / 180;
-
-                // Quando si ruota di 90 o 270, larghezza e altezza si scambiano
-                const isSwapped = (currentRotation / 90) % 2 !== 0;
-                const cw = isSwapped ? originalImage.height : originalImage.width;
-                const ch = isSwapped ? originalImage.width : originalImage.height;
-
-                canvas.width = cw;
-                canvas.height = ch;
-
-                ctx.save();
-                // Trasla il contesto al centro del canvas per la rotazione
-                ctx.translate(cw / 2, ch / 2);
-                ctx.rotate(angle);
-                // Disegna l'immagine centrata sull'origine traslata
-                ctx.drawImage(originalImage, -originalImage.width / 2, -originalImage.height / 2);
-                ctx.restore();
+                const previewWidth = Math.min(originalImage.width, dom.workspace.clientWidth - 32);
+                canvas.width = previewWidth;
+                canvas.height = previewWidth / (originalImage.width / originalImage.height);
+                ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
             }
 
-            function rotate(degrees) {
-                currentRotation = (currentRotation + degrees) % 360;
-                drawImage();
-            }
-            
-            // --- Event Listeners ---
+            dom.widthInput.addEventListener('input', () => {
+                if (isAspectRatioLocked) {
+                    const newWidth = parseInt(dom.widthInput.value, 10);
+                    if (!isNaN(newWidth) && newWidth > 0) {
+                        dom.heightInput.value = Math.round(newWidth / aspectRatio);
+                    }
+                }
+            });
+
+            dom.heightInput.addEventListener('input', () => {
+                if (isAspectRatioLocked) {
+                    const newHeight = parseInt(dom.heightInput.value, 10);
+                    if (!isNaN(newHeight) && newHeight > 0) {
+                        dom.widthInput.value = Math.round(newHeight * aspectRatio);
+                    }
+                }
+            });
+
+            dom.aspectLockBtn.addEventListener('click', () => {
+                isAspectRatioLocked = !isAspectRatioLocked;
+                dom.aspectLockBtn.classList.toggle('locked', isAspectRatioLocked);
+                dom.lockIcon.style.display = isAspectRatioLocked ? 'block' : 'none';
+                dom.unlockIcon.style.display = isAspectRatioLocked ? 'none' : 'block';
+                if(isAspectRatioLocked) {
+                    const newWidth = parseInt(dom.widthInput.value, 10);
+                    if (!isNaN(newWidth) && newWidth > 0) {
+                        dom.heightInput.value = Math.round(newWidth / aspectRatio);
+                    }
+                }
+            });
             
             dom.uploadPlaceholder.addEventListener('click', () => dom.fileInput.click());
             dom.fileInput.addEventListener('change', (e) => handleImageUpload(e.target.files[0]));
             
             ['dragover', 'dragleave', 'drop'].forEach(eventName => {
                 dom.uploadPlaceholder.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault(); e.stopPropagation();
                     if(eventName === 'drop') handleImageUpload(e.dataTransfer.files[0]);
                 });
             });
 
-            dom.rotateLeftBtn.addEventListener('click', () => rotate(-90));
-            dom.rotateRightBtn.addEventListener('click', () => rotate(90));
-            dom.rotate180Btn.addEventListener('click', () => rotate(180));
-
             dom.resetBtn.addEventListener('click', resetWorkspace);
 
-            dom.downloadBtn.addEventListener('click', () => {
+            dom.resizeBtn.addEventListener('click', () => {
                 if (!originalImage) return;
-                
+
+                const newWidth = parseInt(dom.widthInput.value, 10);
+                const newHeight = parseInt(dom.heightInput.value, 10);
+
+                if (isNaN(newWidth) || isNaN(newHeight) || newWidth <= 0 || newHeight <= 0) {
+                    alert('Inserisci dimensioni valide.');
+                    return;
+                }
+
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = newWidth;
+                tempCanvas.height = newHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(originalImage, 0, 0, newWidth, newHeight);
+
                 const link = document.createElement('a');
-                link.download = `rotated_${originalFileName}`;
-                link.href = dom.imageCanvas.toDataURL('image/png');
+                link.download = `resized_${originalFileName}`;
+                link.href = tempCanvas.toDataURL('image/png');
                 link.click();
             });
             
