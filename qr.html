@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CronoTools - Generatore QR Code</title>
+    <style>
+        :root {
+            --bg-primary: #f2f2f7;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e5e5ea;
+            --bg-glass: rgba(255,255,255,0.7);
+            --text-primary: #000000;
+            --text-secondary: rgba(60,60,67,0.6);
+            --accent: #007aff;
+            --separator: rgba(60,60,67,0.15);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --bg-secondary: #1c1c1e;
+            --bg-tertiary: #2c2c2e;
+            --bg-glass: rgba(28,28,30,0.8);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(235,235,245,0.6);
+            --accent: #0a84ff;
+            --separator: rgba(84,84,88,0.4);
+        }
+
+        [data-theme="midnight"] {
+            --bg-primary: #000000;
+            --bg-secondary: #121212;
+            --bg-tertiary: #1E1E1E;
+            --bg-glass: rgba(18,18,18,0.85);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.55);
+            --accent: #0a84ff;
+            --separator: #272729;
+        }
+
+        [data-theme="slate"] {
+            --bg-primary: #0a192f;
+            --bg-secondary: #112240;
+            --bg-tertiary: #233554;
+            --bg-glass: rgba(10,25,47,0.85);
+            --text-primary: #ccd6f6;
+            --text-secondary: #8892b0;
+            --accent: #f97316;
+            --separator: #112240;
+        }
+
+        [data-theme="latte"] {
+            --bg-primary: #EFF1F5;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #E6E9EF;
+            --bg-glass: rgba(239,241,245,0.8);
+            --text-primary: #4C4F69;
+            --text-secondary: #6C6F84;
+            --accent: #8b5cf6;
+            --separator: #DCE0E8;
+        }
+
+        [data-theme="lavanda"] {
+            --bg-primary: #f5f3ff;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #ede9fe;
+            --bg-glass: rgba(245,243,255,0.7);
+            --text-primary: #2e1065;
+            --text-secondary: #5b21b6;
+            --accent: #7c3aed;
+            --separator: #ddd6fe;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding-top: 60px;
+        }
+
+        nav#navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: transparent;
+            border-bottom: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            transition: height 0.3s ease, background-color 0.3s ease, border-bottom 0.3s ease, backdrop-filter 0.3s ease;
+        }
+
+        nav#navbar.scrolled {
+            height: 37px;
+            background-color: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--separator);
+        }
+
+        .nav-placeholder {
+            width: 44px;
+        }
+
+        .nav-center-links {
+            display: flex;
+            gap: 32px;
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        nav#navbar.scrolled .nav-center-links {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        .nav-center-links a {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .nav-center-links a:hover {
+            color: var(--text-primary);
+            background-color: var(--bg-tertiary);
+        }
+
+        .nav-center-links a.active {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .nav-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        nav#navbar.scrolled .nav-title {
+            opacity: 1;
+        }
+
+        .menu-btn {
+            width: 44px;
+            height: 44px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .menu-btn:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        #rightMenuBtn {
+            display: flex;
+        }
+
+        .side-panel {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 300px;
+            background-color: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 2000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .side-panel.left {
+            left: 0;
+            transform: translateX(-100%);
+        }
+
+        .side-panel.right {
+            right: 0;
+            transform: translateX(100%);
+        }
+
+        .side-panel.open {
+            transform: translateX(0);
+        }
+
+        .backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--separator);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-close {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .panel-close:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .panel-content {
+            padding: 0;
+        }
+
+        .panel-link, .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-bottom: 1px solid var(--separator);
+            font-size: 17px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            transition: background-color 0.2s ease;
+        }
+
+        .panel-link:hover, .menu-item:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .panel-link.active {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--separator);
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 17px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .back-btn:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .exclusive-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 24px;
+            width: 280px;
+            background-color: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid var(--separator);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            overflow: hidden;
+            display: none;
+        }
+
+        .dropdown-menu.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .menu-content {
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-level {
+            min-height: 100px;
+        }
+
+        .menu-level.hidden {
+            display: none;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        h1 {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 17px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .glass-card {
+            background-color: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 1px solid var(--separator);
+            border-radius: 12px;
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .color-input-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: 1px solid var(--separator);
+            border-radius: 8px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        input[type="file"] {
+            display: block;
+            padding: 12px;
+            border: 1px solid var(--separator);
+            border-radius: 12px;
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 15px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .qr-preview {
+            background-color: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        #qrCanvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 1024px) {
+            .nav-center-links {
+                display: none !important;
+            }
+
+            #leftMenuBtn {
+                display: flex !important;
+            }
+
+            .menu-btn {
+                display: flex;
+            }
+
+            .side-panel {
+                display: block;
+            }
+
+            .nav-placeholder {
+                width: 44px;
+            }
+
+            nav#navbar .nav-title {
+                opacity: 1;
+            }
+
+            #rightMenuBtn {
+                display: flex;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            #leftMenuBtn {
+                display: none;
+            }
+
+            .side-panel.left {
+                display: none;
+            }
+
+            .dropdown-menu {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <nav id="navbar">
+        <button class="menu-btn" id="leftMenuBtn">☰</button>
+        <div class="nav-placeholder"></div>
+        <div class="nav-center-links" id="desktopNavLinks">
+            <a href="index.html">Converti Immagini</a>
+            <a href="base64.html">Base64</a>
+            <a href="crop.html">Ritaglia</a>
+            <a href="mirror.html">Specchia</a>
+            <a href="resize.html">Ridimensiona</a>
+            <a href="rotate.html">Ruota</a>
+            <a href="grayscale.html">Scala di Grigi</a>
+            <a href="share.html">Condividi</a>
+            <a href="qr.html" class="active">Generatore QR</a>
+        </div>
+        <div class="nav-title">CronoTools - Generatore QR</div>
+        <button class="menu-btn" id="rightMenuBtn">⋯</button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="menu-content" id="dropdownContent">
+                <div class="menu-level" id="dropdownMainMenu">
+                    <button class="menu-item" data-submenu="theme" data-context="dropdown">
+                        <span>Tema</span>
+                        <span>›</span>
+                    </button>
+                    <button class="menu-item" data-submenu="language" data-context="dropdown">
+                        <span>Lingua</span>
+                        <span>›</span>
+                    </button>
+                </div>
+                <div class="menu-level hidden" id="dropdownThemeMenu">
+                    <button class="back-btn" data-back="main" data-context="dropdown">‹ Indietro</button>
+                    <button class="menu-item" data-theme="light">Default Chiaro</button>
+                    <button class="menu-item" data-theme="dark">Default Scuro</button>
+                    <button class="menu-item" data-theme="midnight">Midnight</button>
+                    <button class="menu-item" data-theme="slate">Slate</button>
+                    <button class="menu-item" data-theme="latte">Latte</button>
+                    <button class="menu-item" data-theme="lavanda">
+                        <span>Lavanda</span>
+                        <span class="exclusive-badge">Esclusivo</span>
+                    </button>
+                </div>
+                <div class="menu-level hidden" id="dropdownLanguageMenu">
+                    <button class="back-btn" data-back="main" data-context="dropdown">‹ Indietro</button>
+                    <button class="menu-item" data-lang="it">Italiano</button>
+                    <button class="menu-item" data-lang="en">English</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="backdrop" id="backdrop"></div>
+
+    <div class="side-panel left" id="leftNavPanel">
+        <div class="panel-header">
+            <h3>Menu</h3>
+            <button class="panel-close" id="closeLeftPanel">×</button>
+        </div>
+        <div class="panel-content">
+            <a href="index.html" class="panel-link">Converti Immagini</a>
+            <a href="base64.html" class="panel-link">Base64</a>
+            <a href="crop.html" class="panel-link">Ritaglia</a>
+            <a href="mirror.html" class="panel-link">Specchia</a>
+            <a href="resize.html" class="panel-link">Ridimensiona</a>
+            <a href="rotate.html" class="panel-link">Ruota</a>
+            <a href="grayscale.html" class="panel-link">Scala di Grigi</a>
+            <a href="share.html" class="panel-link">Condividi</a>
+            <a href="qr.html" class="panel-link active">Generatore QR</a>
+        </div>
+    </div>
+
+    <div class="side-panel right" id="rightFunctionsPanel">
+        <div class="panel-header">
+            <h3 id="rightPanelTitle">Funzioni</h3>
+            <button class="panel-close" id="closeRightPanel">×</button>
+        </div>
+        <div class="panel-content" id="rightPanelContent">
+            <div id="mobileMainMenu">
+                <button class="menu-item" data-submenu="theme" data-context="mobile">
+                    <span>Tema</span>
+                    <span>›</span>
+                </button>
+                <button class="menu-item" data-submenu="language" data-context="mobile">
+                    <span>Lingua</span>
+                    <span>›</span>
+                </button>
+            </div>
+            <div class="menu-level hidden" id="mobileThemeMenu">
+                <button class="back-btn" data-back="main" data-context="mobile">‹ Indietro</button>
+                <button class="menu-item" data-theme="light">Default Chiaro</button>
+                <button class="menu-item" data-theme="dark">Default Scuro</button>
+                <button class="menu-item" data-theme="midnight">Midnight</button>
+                <button class="menu-item" data-theme="slate">Slate</button>
+                <button class="menu-item" data-theme="latte">Latte</button>
+                <button class="menu-item" data-theme="lavanda">
+                    <span>Lavanda</span>
+                    <span class="exclusive-badge">Esclusivo</span>
+                </button>
+            </div>
+            <div class="menu-level hidden" id="mobileLanguageMenu">
+                <button class="back-btn" data-back="main" data-context="mobile">‹ Indietro</button>
+                <button class="menu-item" data-lang="it">Italiano</button>
+                <button class="menu-item" data-lang="en">English</button>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="hero">
+            <h1>Generatore QR Code</h1>
+            <p class="description">Genera codici QR personalizzati in modo sicuro e privato. Tutti i dati rimangono sul tuo dispositivo.</p>
+        </div>
+
+        <div class="glass-card">
+            <div class="form-group">
+                <label for="qrContent">Contenuto QR Code</label>
+                <textarea id="qrContent" placeholder="Inserisci testo o URL...">https://cronotools.com</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="qrColor">Colore QR Code</label>
+                <div class="color-input-group">
+                    <input type="color" id="qrColor" value="#000000">
+                    <span id="colorValue">#000000</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="logoInput">Logo (Opzionale)</label>
+                <input type="file" id="logoInput" accept="image/*">
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="qr-preview">
+                <canvas id="qrCanvas"></canvas>
+            </div>
+            <button class="btn-primary" id="downloadBtn">Scarica QR Code</button>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        let logoImage = null;
+        let currentQRColor = '#000000';
+
+        // Scroll effect for navbar
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Get all elements
+        const leftMenuBtn = document.getElementById('leftMenuBtn');
+        const rightMenuBtn = document.getElementById('rightMenuBtn');
+        const leftNavPanel = document.getElementById('leftNavPanel');
+        const rightFunctionsPanel = document.getElementById('rightFunctionsPanel');
+        const backdrop = document.getElementById('backdrop');
+        const closeLeftPanel = document.getElementById('closeLeftPanel');
+        const closeRightPanel = document.getElementById('closeRightPanel');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        // Function to close all panels and reset submenus
+        function closePanels() {
+            leftNavPanel.classList.remove('open');
+            rightFunctionsPanel.classList.remove('open');
+            dropdownMenu.classList.remove('open');
+            backdrop.classList.remove('active');
+            
+            // Reset mobile submenus
+            resetMobileMenu();
+            // Reset dropdown submenus
+            resetDropdownMenu();
+        }
+
+        // Function to reset mobile menu to main view
+        function resetMobileMenu() {
+            document.getElementById('mobileMainMenu').style.display = 'block';
+            document.getElementById('mobileThemeMenu').classList.add('hidden');
+            document.getElementById('mobileLanguageMenu').classList.add('hidden');
+            document.getElementById('rightPanelTitle').textContent = 'Funzioni';
+        }
+
+        // Function to reset dropdown menu to main view
+        function resetDropdownMenu() {
+            document.getElementById('dropdownMainMenu').classList.remove('hidden');
+            document.getElementById('dropdownThemeMenu').classList.add('hidden');
+            document.getElementById('dropdownLanguageMenu').classList.add('hidden');
+        }
+
+        // Open left navigation panel
+        leftMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closePanels();
+            leftNavPanel.classList.add('open');
+            backdrop.classList.add('active');
+        });
+
+        // Open right functions panel or dropdown
+        rightMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth > 1024) {
+                // Desktop: toggle dropdown
+                const isOpen = dropdownMenu.classList.contains('open');
+                closePanels();
+                if (!isOpen) {
+                    dropdownMenu.classList.add('open');
+                }
+            } else {
+                // Mobile: open side panel
+                closePanels();
+                rightFunctionsPanel.classList.add('open');
+                backdrop.classList.add('active');
+            }
+        });
+
+        // Close panels
+        closeLeftPanel.addEventListener('click', closePanels);
+        closeRightPanel.addEventListener('click', closePanels);
+        backdrop.addEventListener('click', closePanels);
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!rightMenuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.remove('open');
+            }
+        });
+
+        // Handle submenu navigation for mobile
+        function showMobileSubmenu(menuType) {
+            const mainMenu = document.getElementById('mobileMainMenu');
+            const themeMenu = document.getElementById('mobileThemeMenu');
+            const languageMenu = document.getElementById('mobileLanguageMenu');
+            const panelTitle = document.getElementById('rightPanelTitle');
+
+            if (menuType === 'theme') {
+                mainMenu.style.display = 'none';
+                themeMenu.classList.remove('hidden');
+                languageMenu.classList.add('hidden');
+                panelTitle.textContent = 'Tema';
+            } else if (menuType === 'language') {
+                mainMenu.style.display = 'none';
+                themeMenu.classList.add('hidden');
+                languageMenu.classList.remove('hidden');
+                panelTitle.textContent = 'Lingua';
+            } else {
+                mainMenu.style.display = 'block';
+                themeMenu.classList.add('hidden');
+                languageMenu.classList.add('hidden');
+                panelTitle.textContent = 'Funzioni';
+            }
+        }
+
+        // Handle submenu navigation for dropdown
+        function showDropdownSubmenu(menuType) {
+            const mainMenu = document.getElementById('dropdownMainMenu');
+            const themeMenu = document.getElementById('dropdownThemeMenu');
+            const languageMenu = document.getElementById('dropdownLanguageMenu');
+
+            if (menuType === 'theme') {
+                mainMenu.classList.add('hidden');
+                themeMenu.classList.remove('hidden');
+                languageMenu.classList.add('hidden');
+            } else if (menuType === 'language') {
+                mainMenu.classList.add('hidden');
+                themeMenu.classList.add('hidden');
+                languageMenu.classList.remove('hidden');
+            } else {
+                mainMenu.classList.remove('hidden');
+                themeMenu.classList.add('hidden');
+                languageMenu.classList.add('hidden');
+            }
+        }
+
+        // Submenu button handlers
+        document.querySelectorAll('[data-submenu]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const submenu = e.currentTarget.dataset.submenu;
+                const context = e.currentTarget.dataset.context;
+                
+                if (context === 'mobile') {
+                    showMobileSubmenu(submenu);
+                } else if (context === 'dropdown') {
+                    showDropdownSubmenu(submenu);
+                }
+            });
+        });
+
+        // Back button handlers
+        document.querySelectorAll('[data-back]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const context = e.currentTarget.dataset.context;
+                
+                if (context === 'mobile') {
+                    showMobileSubmenu('main');
+                } else if (context === 'dropdown') {
+                    showDropdownSubmenu('main');
+                }
+            });
+        });
+
+        // Theme selection handlers
+        document.querySelectorAll('[data-theme]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const theme = e.currentTarget.dataset.theme;
+                document.body.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                closePanels();
+            });
+        });
+
+        // Language selection handlers (placeholder)
+        document.querySelectorAll('[data-lang]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const lang = e.currentTarget.dataset.lang;
+                console.log('Language selected:', lang);
+                // Add language switching logic here
+                closePanels();
+            });
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+
+        // QR Code generation function
+        function generateQRCode() {
+            const canvas = document.getElementById('qrCanvas');
+            const content = document.getElementById('qrContent').value || 'https://cronotools.com';
+            const color = currentQRColor;
+
+            const tempDiv = document.createElement('div');
+            tempDiv.style.display = 'none';
+            document.body.appendChild(tempDiv);
+
+            new QRCode(tempDiv, {
+                text: content,
+                width: 300,
+                height: 300,
+                colorDark: color,
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            setTimeout(() => {
+                const qrImg = tempDiv.querySelector('img');
+                if (qrImg) {
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = 300;
+                    canvas.height = 300;
+
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0);
+
+                        if (logoImage) {
+                            const logoSize = canvas.width * 0.25;
+                            const logoX = (canvas.width - logoSize) / 2;
+                            const logoY = (canvas.height - logoSize) / 2;
+                            const padding = 10;
+
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(logoX - padding, logoY - padding, logoSize + padding * 2, logoSize + padding * 2);
+
+                            ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+                        }
+
+                        document.body.removeChild(tempDiv);
+                    };
+                    img.src = qrImg.src;
+                }
+            }, 100);
+        }
+
+        // QR Code event listeners
+        document.getElementById('qrContent').addEventListener('input', generateQRCode);
+
+        document.getElementById('qrColor').addEventListener('input', (e) => {
+            currentQRColor = e.target.value;
+            document.getElementById('colorValue').textContent = currentQRColor;
+            generateQRCode();
+        });
+
+        document.getElementById('logoInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        logoImage = img;
+                        generateQRCode();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const canvas = document.getElementById('qrCanvas');
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'qrcode.png';
+            link.click();
+        });
+
+        // Generate initial QR code
+        generateQRCode();
+    </script>
+</body>
+</html>
